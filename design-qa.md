@@ -6,7 +6,7 @@
 - Implementation screenshots: `qa-login-desktop.png`, `qa-client-home-desktop.png`, `qa-question-desktop.png`, `qa-psych-desktop.png`, `qa-psych-gad-desktop.png`, plus corresponding mobile captures. These files remain local and are ignored by Git.
 - Desktop viewport: 1280 x 720, full-page captures where needed.
 - Mobile viewport: 390 x 844.
-- States: login, client introduction, client assignment list, gendered question flow, numeric keyboard input, Enter navigation, saved progress, psychologist summary, test report, new-client creation and credential handoff.
+- States: login, client introduction, selectable assignment list, gendered GAD-7 and BDI-II flows, SCID with conditional justification, numeric keyboard input, Enter navigation, saved progress, psychologist summary, test report, new-client creation and credential handoff.
 
 ## Full-view comparison evidence
 
@@ -47,6 +47,9 @@ No actionable P0, P1 or P2 findings remain.
 - Added scale-matched number keys without automatic navigation, so every key maps predictably to the visible answer value; Enter confirms the current answer and advances.
 - Rebuilt account handoff so the panel immediately exposes the URL, login, password and a ready-to-copy client message without collecting an e-mail address.
 - Matched the assignment list to all five stages from the original message: GAD-7 and BDI-II, SCID, developmental interview, AQ result and childhood materials.
+- Made all six forms independently selectable, with the complete set selected by default and one-click select-all/clear controls.
+- Added the 21-part BDI-II flow with gender-aware answer wording, source-form scoring thresholds and an immediate safety notice for answers indicating suicidal thoughts.
+- Added all 106 SCID questions; every TAK answer requires a written example or justification before the next question becomes available.
 - Verified that saved answers update assignment progress after leaving a test.
 - Kept demo credentials and data explicitly separated from the production architecture.
 

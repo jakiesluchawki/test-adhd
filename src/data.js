@@ -11,7 +11,24 @@ export function getGenderLabel(gender) {
 
 export function getQuestionText(question, gender = "neutral") {
   if (typeof question === "string") return question;
+  if (question.text) return getQuestionText(question.text, gender);
   return question[gender] || question.neutral || question.female || question.male;
+}
+
+export function getOptionLabel(option, gender = "neutral") {
+  return getQuestionText(option.label, gender);
+}
+
+export function getQuestionOptions(test, question) {
+  return question?.options || test.scale || null;
+}
+
+export function isAnswerComplete(test, answer) {
+  if (test.answerType === "yesNoWithNote") {
+    if (answer?.value === 0) return true;
+    return answer?.value === 1 && Boolean(answer.note?.trim());
+  }
+  return answer !== undefined && answer !== "";
 }
 
 export const TESTS = [
@@ -105,33 +122,37 @@ export const TESTS = [
     id: "bdi2",
     order: 1,
     mailStep: "01B",
-    available: false,
     short: "BDI-II",
     title: "Inwentarz Depresji Becka (BDI-II)",
-    eyebrow: "Narzędzie licencjonowane",
+    eyebrow: "Kwestionariusz nastroju",
     duration: "około 10 minut",
     image: "./assets/section-03.webp",
     intro:
-      "Druga część pierwszego punktu z wiadomości Emilii. Formularz ocenia nasilenie objawów depresyjnych z ostatnich dwóch tygodni.",
+      "Przy każdej grupie wybierz jedno stwierdzenie, które najlepiej opisuje Twoje samopoczucie w ciągu ostatnich dwóch tygodni.",
     context:
-      "Treść BDI-II nie jest publikowana w otwartym repozytorium. Gabinet może podłączyć formularz w wersji produkcyjnej po potwierdzeniu uprawnień do jego używania.",
-    questions: [],
+      "Wynik pomaga uporządkować informacje o nasileniu objawów depresyjnych. Nie jest samodzielną diagnozą i wymaga omówienia ze specjalistą.",
+    safetyQuestion: 8,
+    questions: BDI_QUESTIONS,
   },
   {
     id: "scid",
     order: 2,
     mailStep: "02",
-    available: false,
     short: "SCID",
     title: "Kwestionariusz SCID",
-    eyebrow: "Narzędzie licencjonowane",
+    eyebrow: "Pytania TAK / NIE",
     duration: "około 25 minut",
     image: "./assets/section-05.webp",
     intro:
       "Pytania TAK/NIE. Każdą odpowiedź TAK klient powinien uzupełnić konkretnym przykładem lub uzasadnieniem.",
     context:
-      "Treść SCID nie jest publikowana w otwartym repozytorium. Silnik odpowiedzi TAK/NIE z komentarzem zostanie podłączony w prywatnej wersji gabinetu.",
-    questions: [],
+      "Odpowiadaj w odniesieniu do tego, jak zwykle czujesz się i zachowujesz w ostatnich kilku latach. Jeśli pytanie jest niejasne, możesz zapisać postęp i omówić je z psychologiem.",
+    answerType: "yesNoWithNote",
+    scale: [
+      { value: 0, label: "Nie" },
+      { value: 1, label: "Tak" },
+    ],
+    questions: SCID_QUESTIONS,
   },
   {
     id: "interview",
@@ -196,6 +217,8 @@ export const TESTS = [
 
 const completedAnswers = {
   gad7: { 0: 2, 1: 1, 2: 2, 3: 2, 4: 0, 5: 2, 6: 1 },
+  bdi2: Object.fromEntries(BDI_QUESTIONS.map((_, index) => [index, 0])),
+  scid: Object.fromEntries(SCID_QUESTIONS.map((_, index) => [index, { value: 0, note: "" }])),
   interview: {
     0: "Lubiłem naukę, szczególnie przedmioty ścisłe. Trudniej było mi utrzymać uwagę przy zadaniach powtarzalnych.",
     1: "Własne notatki, jasno zapisane terminy i praca w krótkich blokach.",
@@ -256,12 +279,8 @@ export const PSYCHOLOGIST = {
 };
 
 export function getTestProgress(client, test) {
-  if (test.available === false) {
-    return { answerCount: 0, total: 0, percent: 0, completed: false, unavailable: true };
-  }
-  const answerCount = Object.keys(client.answers?.[test.id] || {}).filter(
-    (key) => client.answers[test.id][key] !== "",
-  ).length;
+  const answers = client.answers?.[test.id] || {};
+  const answerCount = test.questions.filter((_, index) => isAnswerComplete(test, answers[index])).length;
   return {
     answerCount,
     total: test.questions.length,
@@ -277,26 +296,29 @@ export function getAssignedTests(client) {
 }
 
 export function getClientProgress(client) {
-  const availableTests = getAssignedTests(client).filter((test) => test.available !== false);
-  const answered = availableTests.reduce(
+  const assignedTests = getAssignedTests(client);
+  const answered = assignedTests.reduce(
     (sum, test) => sum + getTestProgress(client, test).answerCount,
     0,
   );
-  const total = availableTests.reduce((sum, test) => sum + test.questions.length, 0);
+  const total = assignedTests.reduce((sum, test) => sum + test.questions.length, 0);
   return {
     answered,
     total,
-    percent: Math.round((answered / total) * 100),
-    completed: availableTests.every((test) => client.completedTests.includes(test.id)),
+    percent: total ? Math.round((answered / total) * 100) : 0,
+    completed: Boolean(total) && assignedTests.every((test) => client.completedTests.includes(test.id)),
   };
 }
 
 export function getScore(test, answers = {}) {
-  if (!test.scale) return null;
-  const values = Object.values(answers).map(Number);
+  if (!test.scale && test.id !== "bdi2") return null;
+  if (test.answerType === "yesNoWithNote") return null;
+  const values = Object.values(answers).map((answer) => Number(answer));
   if (!values.length) return null;
   const value = values.reduce((sum, current) => sum + current, 0);
-  const max = test.questions.length * Math.max(...test.scale.map((item) => item.value));
+  const max = test.id === "bdi2"
+    ? 63
+    : test.questions.length * Math.max(...test.scale.map((item) => item.value));
   if (test.id === "gad7") {
     const interpretation =
       value < 5
@@ -308,9 +330,25 @@ export function getScore(test, answers = {}) {
             : "Znaczne nasilenie objawów";
     return { value, max, interpretation };
   }
+  if (test.id === "bdi2") {
+    const interpretation = value < 12
+      ? "Brak depresji według progów z formularza"
+      : value < 20
+        ? "Możliwość łagodnej depresji"
+        : value < 26
+          ? "Umiarkowane nasilenie objawów depresyjnych"
+          : "Wynik w zakresie ciężkiej depresji";
+    return {
+      value,
+      max,
+      interpretation,
+      alert: Number(answers[test.safetyQuestion]) > 0,
+    };
+  }
   return {
     value,
     max,
     interpretation: "Wynik roboczy do omówienia podczas konsultacji",
   };
 }
+import { BDI_QUESTIONS, SCID_QUESTIONS } from "./assessmentData.js";

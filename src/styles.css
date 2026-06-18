@@ -1089,6 +1089,38 @@ h1,
   font-weight: 400;
 }
 
+.scid-note {
+  margin-top: 18px;
+}
+
+.scid-note textarea {
+  min-height: 132px;
+  background: var(--coral-soft);
+}
+
+.safety-alert {
+  display: grid;
+  max-width: 780px;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 14px;
+  margin-top: 20px;
+  border: 1px solid oklch(0.72 0.11 28);
+  border-radius: 6px;
+  padding: 16px;
+  background: oklch(0.95 0.035 28);
+  color: oklch(0.37 0.1 25);
+}
+
+.safety-alert p {
+  margin: 5px 0 0;
+  line-height: 1.55;
+}
+
+.report-safety-alert {
+  max-width: none;
+  margin: 28px 0 0;
+}
+
 .question-actions {
   display: flex;
   max-width: 780px;
@@ -1555,6 +1587,37 @@ h1,
   font-weight: 700;
 }
 
+.assignment-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.assignment-controls > div {
+  display: flex;
+  gap: 12px;
+}
+
+.assignment-controls button {
+  border: 0;
+  padding: 4px 0;
+  background: transparent;
+  color: var(--cobalt);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.assignment-controls button:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .gender-fieldset > p {
   margin: 0 0 4px;
   color: var(--muted);
@@ -1635,14 +1698,6 @@ h1,
 
 .checked-test small {
   color: var(--muted);
-}
-
-.checked-test.is-unavailable {
-  color: var(--muted);
-}
-
-.checked-test.is-unavailable input {
-  opacity: 0.45;
 }
 
 .create-success > svg {

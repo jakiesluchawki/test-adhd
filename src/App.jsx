@@ -26,9 +26,12 @@ import {
   getAssignedTests,
   getClientProgress,
   getGenderLabel,
+  getOptionLabel,
+  getQuestionOptions,
   getQuestionText,
   getScore,
   getTestProgress,
+  isAnswerComplete,
 } from "./data.js";
 
 const STORAGE_KEY = "wrownowadze-testy-demo-v1";
@@ -296,6 +299,21 @@ function ProgressBar({ value, label }) {
   );
 }
 
+function formatAnswer(test, question, raw, gender) {
+  if (test.answerType === "yesNoWithNote") {
+    if (raw?.value === undefined) return "";
+    const option = test.scale.find((item) => item.value === raw.value);
+    const label = getOptionLabel(option, gender);
+    return raw.value === 1 && raw.note ? `${label}. ${raw.note}` : label;
+  }
+  const options = getQuestionOptions(test, question);
+  if (options) {
+    const option = options.find((item) => item.value === Number(raw));
+    return option ? getOptionLabel(option, gender) : "";
+  }
+  return raw;
+}
+
 function ClientHome({ client, onOpenTest }) {
   const overall = getClientProgress(client);
   const assignedTests = getAssignedTests(client);
@@ -383,11 +401,14 @@ function ClientHome({ client, onOpenTest }) {
 function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
   const answers = client.answers[test.id] || {};
   const firstOpen = test.questions.findIndex(
-    (_, index) => answers[index] === undefined || answers[index] === "",
+    (_, questionIndex) => !isAnswerComplete(test, answers[questionIndex]),
   );
   const [stage, setStage] = useState("intro");
   const [index, setIndex] = useState(firstOpen === -1 ? 0 : firstOpen);
   const answer = answers[index];
+  const question = test.questions[index];
+  const questionOptions = getQuestionOptions(test, question);
+  const answerReady = isAnswerComplete(test, answer);
   const progress = getTestProgress(client, test);
 
   useEffect(() => {
@@ -411,8 +432,7 @@ function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
           || target instanceof HTMLSelectElement
           || target instanceof HTMLButtonElement
           || target instanceof HTMLAnchorElement
-          || answer === undefined
-          || answer === ""
+          || !answerReady
         ) return;
         event.preventDefault();
         if (index < test.questions.length - 1) setIndex(index + 1);
@@ -420,20 +440,26 @@ function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
         return;
       }
 
-      if (!test.scale) return;
+      if (!questionOptions) return;
       if (
         (target instanceof HTMLInputElement && target.type !== "radio")
         || target instanceof HTMLTextAreaElement
         || target instanceof HTMLSelectElement
       ) return;
-      const option = test.scale.find((item) => String(item.value) === event.key);
+      const option = questionOptions.find((item) => String(item.value) === event.key);
       if (!option) return;
       event.preventDefault();
-      onAnswer(test.id, index, option.value);
+      onAnswer(
+        test.id,
+        index,
+        test.answerType === "yesNoWithNote"
+          ? { value: option.value, note: answer?.note || "" }
+          : option.value,
+      );
     };
     window.addEventListener("keydown", handleKeyboard);
     return () => window.removeEventListener("keydown", handleKeyboard);
-  }, [stage, index, test, answer, onAnswer]);
+  }, [stage, index, test, answer, answerReady, questionOptions, onAnswer]);
 
   const goNext = () => {
     if (index < test.questions.length - 1) setIndex(index + 1);
@@ -482,10 +508,8 @@ function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
   }
 
   if (stage === "review") {
-    const complete = test.questions.every(
-      (_, questionIndex) =>
-        answers[questionIndex] !== undefined && answers[questionIndex] !== "",
-    );
+    const complete = test.questions.every((_, questionIndex) =>
+      isAnswerComplete(test, answers[questionIndex]));
     return (
       <main className="review-page page-width">
         <button className="back-link" onClick={() => setStage("questions")}>
@@ -503,9 +527,7 @@ function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
           {test.questions.map((question, questionIndex) => {
             const value = answers[questionIndex];
             const questionText = getQuestionText(question, client.gender);
-            const display = test.scale
-              ? test.scale.find((item) => item.value === Number(value))?.label
-              : value;
+            const display = formatAnswer(test, question, value, client.gender);
             return (
               <button
                 className="review-row"
@@ -556,33 +578,58 @@ function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
         </aside>
         <section className="question-stage" aria-labelledby="question-title">
           <span className="question-number">{String(index + 1).padStart(2, "0")}</span>
-          <h1 id="question-title">{getQuestionText(test.questions[index], client.gender)}</h1>
-          {test.scale ? (
+          <h1 id="question-title">{getQuestionText(question, client.gender)}</h1>
+          {questionOptions ? (
+            <>
             <fieldset className="answer-options">
               <legend>
                 <span>Wybierz jedną odpowiedź</span>
                 <span className="keyboard-hint">
-                  Klawiatura: {test.scale.map((option) => option.value).join(" · ")} · Enter → dalej
+                  Klawiatura: {questionOptions.map((option) => option.value).join(" · ")} · Enter → dalej
                 </span>
               </legend>
-              {test.scale.map((option) => (
+              {questionOptions.map((option) => {
+                const selectedValue = test.answerType === "yesNoWithNote"
+                  ? answer?.value
+                  : Number(answer);
+                return (
                 <label
-                  className={`answer-option ${Number(answer) === option.value ? "selected" : ""}`}
+                  className={`answer-option ${selectedValue === option.value ? "selected" : ""}`}
                   key={option.value}
                 >
                   <input
                     type="radio"
                     name={`answer-${index}`}
                     value={option.value}
-                    checked={Number(answer) === option.value}
-                    onChange={() => onAnswer(test.id, index, option.value)}
+                    checked={selectedValue === option.value}
+                    onChange={() => onAnswer(
+                      test.id,
+                      index,
+                      test.answerType === "yesNoWithNote"
+                        ? { value: option.value, note: answer?.note || "" }
+                        : option.value,
+                    )}
                   />
                   <span className="option-value">{option.value}</span>
-                  <span>{option.label}</span>
+                  <span>{getOptionLabel(option, client.gender)}</span>
                   <CheckCircle2 size={20} aria-hidden="true" />
                 </label>
-              ))}
+                );
+              })}
             </fieldset>
+            {test.answerType === "yesNoWithNote" && answer?.value === 1 && (
+              <label className="long-answer scid-note">
+                <span>Przykład lub uzasadnienie odpowiedzi TAK</span>
+                <textarea
+                  value={answer.note || ""}
+                  onChange={(event) => onAnswer(test.id, index, { value: 1, note: event.target.value })}
+                  rows="5"
+                  placeholder="Opisz konkretną sytuację. To pole jest wymagane dla odpowiedzi TAK."
+                />
+                <small>Po zapisaniu przykładu możesz przejść do kolejnego pytania.</small>
+              </label>
+            )}
+            </>
           ) : test.id === "aq" ? (
             <label className="short-answer">
               <span>Wynik AQ</span>
@@ -609,6 +656,15 @@ function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
               <small>Odpowiedź zapisuje się automatycznie.</small>
             </label>
           )}
+          {test.id === "bdi2" && index === test.safetyQuestion && Number(answer) > 0 && (
+            <aside className="safety-alert" role="alert">
+              <ShieldCheck size={22} />
+              <div>
+                <strong>Nie zostawaj z tym bez wsparcia</strong>
+                <p>Skontaktuj się z lekarzem psychiatrą lub innym specjalistą. Jeśli istnieje bezpośrednie zagrożenie życia, zadzwoń pod numer 112.</p>
+              </div>
+            </aside>
+          )}
           <div className="question-actions">
             <button
               className="button button-secondary"
@@ -619,7 +675,7 @@ function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
             </button>
             <button
               className="button button-primary"
-              disabled={answer === undefined || answer === ""}
+              disabled={!answerReady}
               onClick={goNext}
             >
               {index === test.questions.length - 1 ? "Sprawdź odpowiedzi" : "Dalej"}
@@ -775,9 +831,7 @@ function TestReport({ client, test }) {
         {test.questions.map((question, index) => {
           const raw = answers[index];
           const questionText = getQuestionText(question, client.gender);
-          const value = test.scale
-            ? test.scale.find((option) => option.value === Number(raw))?.label
-            : raw;
+          const value = formatAnswer(test, question, raw, client.gender);
           return (
             <article key={`${test.id}-${index}`}>
               <span>{String(index + 1).padStart(2, "0")}</span>
@@ -789,6 +843,15 @@ function TestReport({ client, test }) {
           );
         })}
       </div>
+      {score?.alert && (
+        <aside className="safety-alert report-safety-alert">
+          <ShieldCheck size={22} />
+          <div>
+            <strong>Odpowiedź wymagająca pilnego omówienia</strong>
+            <p>W pytaniu dotyczącym myśli samobójczych zaznaczono odpowiedź inną niż „Nie myślę o odebraniu sobie życia”.</p>
+          </div>
+        </aside>
+      )}
     </section>
   );
 }
@@ -886,6 +949,8 @@ function CreateClient({ onCreate, onCancel }) {
   const [gender, setGender] = useState("");
   const [created, setCreated] = useState(null);
   const [copied, setCopied] = useState("");
+  const assignableTests = TESTS.filter((test) => !test.supplemental);
+  const [selectedTests, setSelectedTests] = useState(assignableTests.map((test) => test.id));
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -905,7 +970,7 @@ function CreateClient({ onCreate, onCancel }) {
       password,
       assignedAt: new Date().toLocaleDateString("pl-PL"),
       deadline: "do ustalenia",
-      assignedTests: TESTS.filter((test) => !test.supplemental).map((test) => test.id),
+      assignedTests: selectedTests,
       introAccepted: false,
       answers: Object.fromEntries(TESTS.map((test) => [test.id, {}])),
       completedTests: [],
@@ -991,17 +1056,31 @@ function CreateClient({ onCreate, onCancel }) {
           </fieldset>
           <fieldset>
             <legend>Zakres z wiadomości Emilii</legend>
-            {TESTS.filter((test) => !test.supplemental).map((test) => (
-              <label className={`checked-test ${test.available === false ? "is-unavailable" : ""}`} key={test.id}>
-                <input type="checkbox" checked={test.available !== false} readOnly disabled={test.available === false} />
+            <div className="assignment-controls">
+              <span>{selectedTests.length} z {assignableTests.length} formularzy</span>
+              <div>
+                <button type="button" onClick={() => setSelectedTests(assignableTests.map((test) => test.id))}>Zaznacz wszystkie</button>
+                <button type="button" onClick={() => setSelectedTests([])}>Wyczyść</button>
+              </div>
+            </div>
+            {assignableTests.map((test) => (
+              <label className="checked-test" key={test.id}>
+                <input
+                  type="checkbox"
+                  checked={selectedTests.includes(test.id)}
+                  onChange={() => setSelectedTests((current) => current.includes(test.id)
+                    ? current.filter((id) => id !== test.id)
+                    : [...current, test.id])}
+                />
                 <span>
                   <strong>{test.mailStep} · {test.title}</strong>
-                  <small>{test.available === false ? "Do podłączenia w prywatnej wersji gabinetu" : test.duration}</small>
+                  <small>{test.duration}</small>
                 </span>
               </label>
             ))}
           </fieldset>
-          <button className="button button-primary" type="submit"><Plus size={18} /> Utwórz konto demo</button>
+          {selectedTests.length === 0 && <p className="form-error">Wybierz co najmniej jeden formularz.</p>}
+          <button className="button button-primary" type="submit" disabled={selectedTests.length === 0}><Plus size={18} /> Utwórz konto demo</button>
         </form>
       </section>
       <img src="./assets/section-05.webp" alt="Abstrakcyjna kompozycja symbolizująca rozpoczęcie procesu" />

@@ -55,6 +55,6 @@ Panel zachowuje kolejność materiałów z wiadomości organizacyjnej:
 4. wynik AQ z zewnętrznego testu;
 5. materiały z dzieciństwa.
 
-GAD-7, wywiad, wpisanie wyniku AQ i opis materiałów z dzieciństwa działają w demo. BDI-II i SCID są widoczne we właściwych miejscach, lecz wymagają podłączenia w prywatnym środowisku gabinetu — publiczne repozytorium nie zawiera treści licencjonowanych formularzy.
+Wszystkie formularze z wiadomości można przydzielać pojedynczo lub jako pełny zestaw. BDI-II działa jako 21 grup odpowiedzi z wynikiem i komunikatem bezpieczeństwa, a SCID zawiera 106 pytań TAK/NIE oraz obowiązkowe uzasadnienie każdej odpowiedzi TAK.
 
 Wersja demonstracyjna nie zbiera adresu e-mail. Po utworzeniu konta pokazuje adres panelu, login, hasło i gotową wiadomość, którą psycholog może ręcznie przekazać klientowi wybranym kanałem.
