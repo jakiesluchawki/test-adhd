@@ -2,11 +2,11 @@
 
 ## Evidence
 
-- Source visual truth: local-only captures in `../source-captures/`, including lock, overview and GAD views. They are not committed because the source report contains private data.
+- Source visual truth: temporary local captures of the owned lock, overview and GAD views were used and then deleted because the source report contains private data.
 - Implementation screenshots: `qa-login-desktop.png`, `qa-client-home-desktop.png`, `qa-question-desktop.png`, `qa-psych-desktop.png`, `qa-psych-gad-desktop.png`, plus corresponding mobile captures. These files remain local and are ignored by Git.
 - Desktop viewport: 1280 x 720, full-page captures where needed.
 - Mobile viewport: 390 x 844.
-- States: login, client introduction, client assignment list, question flow, saved progress, psychologist summary, test report and new-client creation.
+- States: login, client introduction, client assignment list, gendered question flow, numeric keyboard input, saved progress, psychologist summary, test report and new-client creation.
 
 ## Full-view comparison evidence
 
@@ -18,7 +18,7 @@ Intentional differences support the new product workflow: the psychologist repor
 
 - Login typography and art crop: heading scale, image subject and warm surface match the source language.
 - Report hierarchy: large diagnosis title, image split, notice field and ruled result rows match the source.
-- Question controls: familiar radio rows use the same restrained palette while meeting 44 px touch-target requirements.
+- Question controls: familiar radio rows use the same restrained palette, expose direct 0-to-0 numeric shortcuts and meet 44 px touch-target requirements.
 - Mobile: long headings wrap without clipping, action buttons remain reachable and the question flow resets scroll position between steps.
 
 ## Fidelity surfaces
@@ -29,7 +29,7 @@ Intentional differences support the new product workflow: the psychologist repor
 - Image quality and asset fidelity: passed. All visible illustration assets are copied from the owned source and preserve aspect ratio. No CSS or SVG substitutes are used.
 - Copy and content: passed. Client-facing context explains purpose, duration, privacy and the non-diagnostic role of screening tools.
 - States and interactions: passed. Login, introduction, persistence, answer selection, navigation, review, report tabs and client creation were exercised in-browser.
-- Accessibility: passed for prototype scope. Semantic labels, keyboard-native controls, focus styles, reduced-motion handling and mobile tap targets are present.
+- Accessibility: passed for prototype scope. Semantic labels, direct numeric shortcuts, keyboard-native controls, visible radio focus, reduced-motion handling and mobile tap targets are present.
 
 ## Findings
 
@@ -43,6 +43,8 @@ No actionable P0, P1 or P2 findings remain.
 ## Patches made during QA
 
 - Added scroll reset when changing test stage or question so mobile users always see the full heading and context.
+- Added female, male and neutral grammatical variants selected while creating the client account and reused in the psychologist report.
+- Added scale-matched number keys without automatic navigation, so every key maps predictably to the visible answer value.
 - Verified that saved answers update assignment progress after leaving a test.
 - Kept demo credentials and data explicitly separated from the production architecture.
 

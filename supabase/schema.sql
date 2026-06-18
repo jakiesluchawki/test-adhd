@@ -15,6 +15,8 @@ create table public.clients (
   user_id uuid unique not null references public.profiles(id) on delete cascade,
   psychologist_id uuid not null references public.profiles(id),
   reference_code text unique not null,
+  grammatical_gender text not null default 'neutral'
+    check (grammatical_gender in ('female', 'male', 'neutral')),
   created_at timestamptz not null default now()
 );
 

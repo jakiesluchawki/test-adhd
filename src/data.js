@@ -1,3 +1,19 @@
+export const GENDER_OPTIONS = [
+  { value: "female", label: "Kobieta", description: "żeńska forma pytań" },
+  { value: "male", label: "Mężczyzna", description: "męska forma pytań" },
+  { value: "neutral", label: "Bez wskazania", description: "neutralna forma pytań" },
+];
+
+export function getGenderLabel(gender) {
+  return GENDER_OPTIONS.find((option) => option.value === gender)?.description
+    || GENDER_OPTIONS.at(-1).description;
+}
+
+export function getQuestionText(question, gender = "neutral") {
+  if (typeof question === "string") return question;
+  return question[gender] || question.neutral || question.female || question.male;
+}
+
 export const TESTS = [
   {
     id: "adhd-start",
@@ -44,13 +60,41 @@ export const TESTS = [
       { value: 3, label: "Niemal codziennie" },
     ],
     questions: [
-      "Czuł(a) się Pan(i) podenerwowany(a), niespokojny(a), mocno spięty(a).",
-      "Nie mógł(a) Pan(i) przestać się martwić albo zapanować nad tym.",
-      "Za bardzo się Pan(i) martwił(a) różnymi rzeczami.",
-      "Miał(a) Pan(i) trudności z relaksowaniem się.",
-      "Był(a) Pan(i) tak niespokojny(a), że nie mógł(a) usiedzieć na miejscu.",
-      "Łatwo stawał(a) się Pan(i) rozdrażniony(a) lub poirytowany(a).",
-      "Obawiał(a) się Pan(i), tak jakby miało się stać coś strasznego.",
+      {
+        female: "Czułaś się podenerwowana, niespokojna lub mocno spięta.",
+        male: "Czułeś się podenerwowany, niespokojny lub mocno spięty.",
+        neutral: "Pojawiało się u Ciebie zdenerwowanie, niepokój lub silne napięcie.",
+      },
+      {
+        female: "Nie mogłaś przestać się martwić albo zapanować nad zamartwianiem się.",
+        male: "Nie mogłeś przestać się martwić albo zapanować nad zamartwianiem się.",
+        neutral: "Trudno było Ci przestać się martwić albo zapanować nad zamartwianiem się.",
+      },
+      {
+        female: "Za bardzo martwiłaś się różnymi rzeczami.",
+        male: "Za bardzo martwiłeś się różnymi rzeczami.",
+        neutral: "Martwienie się różnymi rzeczami stawało się nadmierne.",
+      },
+      {
+        female: "Miałaś trudności z relaksowaniem się.",
+        male: "Miałeś trudności z relaksowaniem się.",
+        neutral: "Trudno było Ci się zrelaksować.",
+      },
+      {
+        female: "Byłaś tak niespokojna, że nie mogłaś usiedzieć na miejscu.",
+        male: "Byłeś tak niespokojny, że nie mogłeś usiedzieć na miejscu.",
+        neutral: "Niepokój utrudniał Ci pozostanie w miejscu.",
+      },
+      {
+        female: "Łatwo stawałaś się rozdrażniona lub poirytowana.",
+        male: "Łatwo stawałeś się rozdrażniony lub poirytowany.",
+        neutral: "Łatwo pojawiało się u Ciebie rozdrażnienie lub poirytowanie.",
+      },
+      {
+        female: "Obawiałaś się, jakby miało się stać coś strasznego.",
+        male: "Obawiałeś się, jakby miało się stać coś strasznego.",
+        neutral: "Pojawiała się obawa, że może się stać coś strasznego.",
+      },
     ],
   },
   {
@@ -94,6 +138,7 @@ export function createInitialWorkspace() {
       {
         id: "anna-demo",
         name: "Anna Kowalska",
+        gender: "female",
         login: "anna.demo",
         password: "spokojny-start",
         email: "anna@example.test",
@@ -106,6 +151,7 @@ export function createInitialWorkspace() {
       {
         id: "marek-demo",
         name: "Marek Wiśniewski",
+        gender: "male",
         login: "marek.demo",
         password: "jasny-plan",
         email: "marek@example.test",

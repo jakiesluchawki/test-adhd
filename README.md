@@ -2,8 +2,8 @@
 
 Interaktywny prototyp panelu do przeprowadzania testów przed konsultacją psychologiczną. Zawiera dwa kompletne przepływy:
 
-- klient: logowanie, wprowadzenie, zapis postępu, pytania zamknięte i opisowe, przegląd odpowiedzi;
-- psycholog: lista klientów, statusy, tworzenie kont demo i skonsolidowany raport z drukiem do PDF.
+- klient: logowanie, wprowadzenie, zapis postępu, pytania zamknięte i opisowe, skróty numeryczne oraz przegląd odpowiedzi;
+- psycholog: lista klientów, statusy, tworzenie kont demo z wyborem formy językowej pytań i skonsolidowany raport z drukiem do PDF.
 
 ## Demo
 

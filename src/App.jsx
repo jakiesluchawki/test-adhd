@@ -18,10 +18,13 @@ import {
   UsersRound,
 } from "lucide-react";
 import {
+  GENDER_OPTIONS,
   PSYCHOLOGIST,
   TESTS,
   createInitialWorkspace,
   getClientProgress,
+  getGenderLabel,
+  getQuestionText,
   getScore,
   getTestProgress,
 } from "./data.js";
@@ -31,7 +34,16 @@ const STORAGE_KEY = "wrownowadze-testy-demo-v1";
 function loadWorkspace() {
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : createInitialWorkspace();
+    if (!stored) return createInitialWorkspace();
+    const workspace = JSON.parse(stored);
+    return {
+      ...workspace,
+      clients: workspace.clients.map((client) => ({
+        ...client,
+        gender: client.gender
+          || (client.id === "anna-demo" ? "female" : client.id === "marek-demo" ? "male" : "neutral"),
+      })),
+    };
   } catch {
     return createInitialWorkspace();
   }
@@ -357,6 +369,28 @@ function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [stage, index, test.id]);
 
+  useEffect(() => {
+    if (stage !== "questions" || !test.scale) return undefined;
+    const handleNumberKey = (event) => {
+      const target = event.target;
+      if (
+        event.altKey
+        || event.ctrlKey
+        || event.metaKey
+        || (target instanceof HTMLInputElement && target.type !== "radio")
+        || target instanceof HTMLTextAreaElement
+        || target instanceof HTMLSelectElement
+        || target?.isContentEditable
+      ) return;
+      const option = test.scale.find((item) => String(item.value) === event.key);
+      if (!option) return;
+      event.preventDefault();
+      onAnswer(test.id, index, option.value);
+    };
+    window.addEventListener("keydown", handleNumberKey);
+    return () => window.removeEventListener("keydown", handleNumberKey);
+  }, [stage, index, test, onAnswer]);
+
   const goNext = () => {
     if (index < test.questions.length - 1) setIndex(index + 1);
     else setStage("review");
@@ -419,20 +453,21 @@ function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
         <div className="review-list">
           {test.questions.map((question, questionIndex) => {
             const value = answers[questionIndex];
+            const questionText = getQuestionText(question, client.gender);
             const display = test.scale
               ? test.scale.find((item) => item.value === Number(value))?.label
               : value;
             return (
               <button
                 className="review-row"
-                key={question}
+                key={`${test.id}-${questionIndex}`}
                 onClick={() => {
                   setIndex(questionIndex);
                   setStage("questions");
                 }}
               >
                 <span>{String(questionIndex + 1).padStart(2, "0")}</span>
-                <span><strong>{question}</strong><small>{display || "Brak odpowiedzi"}</small></span>
+                <span><strong>{questionText}</strong><small>{display || "Brak odpowiedzi"}</small></span>
                 <ChevronRight size={18} />
               </button>
             );
@@ -472,10 +507,15 @@ function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
         </aside>
         <section className="question-stage" aria-labelledby="question-title">
           <span className="question-number">{String(index + 1).padStart(2, "0")}</span>
-          <h1 id="question-title">{test.questions[index]}</h1>
+          <h1 id="question-title">{getQuestionText(test.questions[index], client.gender)}</h1>
           {test.scale ? (
             <fieldset className="answer-options">
-              <legend>Wybierz jedną odpowiedź</legend>
+              <legend>
+                <span>Wybierz jedną odpowiedź</span>
+                <span className="keyboard-hint">
+                  Klawiatura: {test.scale.map((option) => option.value).join(" · ")}
+                </span>
+              </legend>
               {test.scale.map((option) => (
                 <label
                   className={`answer-option ${Number(answer) === option.value ? "selected" : ""}`}
@@ -649,14 +689,15 @@ function TestReport({ client, test }) {
       <div className="report-answers">
         {test.questions.map((question, index) => {
           const raw = answers[index];
+          const questionText = getQuestionText(question, client.gender);
           const value = test.scale
             ? test.scale.find((option) => option.value === Number(raw))?.label
             : raw;
           return (
-            <article key={question}>
+            <article key={`${test.id}-${index}`}>
               <span>{String(index + 1).padStart(2, "0")}</span>
               <div>
-                <strong>{question}</strong>
+                <strong>{questionText}</strong>
                 <p>{value || "Brak odpowiedzi"}</p>
               </div>
             </article>
@@ -680,6 +721,7 @@ function ReportSummary({ client }) {
         </p>
         <dl>
           <div><dt>Klient</dt><dd>{client.name}</dd></div>
+          <div><dt>Forma pytań</dt><dd>{getGenderLabel(client.gender)}</dd></div>
           <div><dt>Przydzielono</dt><dd>{client.assignedAt}</dd></div>
           <div><dt>Status</dt><dd>{overall.completed ? "Ukończono" : `W trakcie, ${overall.percent}%`}</dd></div>
         </dl>
@@ -745,6 +787,7 @@ function ReportView({ client }) {
 function CreateClient({ onCreate, onCancel }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [gender, setGender] = useState("");
   const [created, setCreated] = useState(null);
   const [copied, setCopied] = useState(false);
 
@@ -758,6 +801,7 @@ function CreateClient({ onCreate, onCancel }) {
       id: `${Date.now()}`,
       name: name.trim(),
       email: email.trim(),
+      gender,
       login,
       password,
       assignedAt: new Date().toLocaleDateString("pl-PL"),
@@ -786,6 +830,7 @@ function CreateClient({ onCreate, onCancel }) {
           <dl className="credentials-box">
             <div><dt>Login</dt><dd>{created.login}</dd></div>
             <div><dt>Hasło</dt><dd>{created.password}</dd></div>
+            <div><dt>Forma pytań</dt><dd>{getGenderLabel(created.gender)}</dd></div>
           </dl>
           <button className="button button-primary" onClick={copyCredentials}>
             <Copy size={17} /> {copied ? "Skopiowano" : "Kopiuj dane"}
@@ -806,6 +851,26 @@ function CreateClient({ onCreate, onCancel }) {
         <form onSubmit={submit}>
           <label><span>Imię i nazwisko</span><input required value={name} onChange={(event) => setName(event.target.value)} placeholder="np. Aleksandra Nowak" /></label>
           <label><span>E-mail</span><input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="aleksandra@example.com" /></label>
+          <fieldset className="gender-fieldset">
+            <legend>Płeć i forma językowa pytań</legend>
+            <p>Ustawienie zmienia wyłącznie odmianę treści, nie wpływa na wynik.</p>
+            <div className="gender-options">
+              {GENDER_OPTIONS.map((option) => (
+                <label className={`gender-option ${gender === option.value ? "selected" : ""}`} key={option.value}>
+                  <input
+                    type="radio"
+                    name="gender"
+                    value={option.value}
+                    checked={gender === option.value}
+                    onChange={() => setGender(option.value)}
+                    required
+                  />
+                  <span><strong>{option.label}</strong><small>{option.description}</small></span>
+                  <CheckCircle2 size={18} aria-hidden="true" />
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <fieldset>
             <legend>Przydzielone części</legend>
             {TESTS.map((test) => <label className="checked-test" key={test.id}><input type="checkbox" checked readOnly /><span><strong>{test.title}</strong><small>{test.duration}</small></span></label>)}
