@@ -6,7 +6,7 @@
 - Implementation screenshots: `qa-login-desktop.png`, `qa-client-home-desktop.png`, `qa-question-desktop.png`, `qa-psych-desktop.png`, `qa-psych-gad-desktop.png`, plus corresponding mobile captures. These files remain local and are ignored by Git.
 - Desktop viewport: 1280 x 720, full-page captures where needed.
 - Mobile viewport: 390 x 844.
-- States: login, client introduction, client assignment list, gendered question flow, numeric keyboard input, saved progress, psychologist summary, test report and new-client creation.
+- States: login, client introduction, client assignment list, gendered question flow, numeric keyboard input, Enter navigation, saved progress, psychologist summary, test report, new-client creation and credential handoff.
 
 ## Full-view comparison evidence
 
@@ -28,7 +28,7 @@ Intentional differences support the new product workflow: the psychologist repor
 - Colors and visual tokens: passed. The implementation maps the source palette to documented OKLCH tokens and includes clear semantic states.
 - Image quality and asset fidelity: passed. All visible illustration assets are copied from the owned source and preserve aspect ratio. No CSS or SVG substitutes are used.
 - Copy and content: passed. Client-facing context explains purpose, duration, privacy and the non-diagnostic role of screening tools.
-- States and interactions: passed. Login, introduction, persistence, answer selection, navigation, review, report tabs and client creation were exercised in-browser.
+- States and interactions: passed. Login, introduction, persistence, answer selection, numeric shortcuts, Enter navigation, review, report tabs, client creation and credential handoff were exercised in-browser.
 - Accessibility: passed for prototype scope. Semantic labels, direct numeric shortcuts, keyboard-native controls, visible radio focus, reduced-motion handling and mobile tap targets are present.
 
 ## Findings
@@ -44,7 +44,9 @@ No actionable P0, P1 or P2 findings remain.
 
 - Added scroll reset when changing test stage or question so mobile users always see the full heading and context.
 - Added female, male and neutral grammatical variants selected while creating the client account and reused in the psychologist report.
-- Added scale-matched number keys without automatic navigation, so every key maps predictably to the visible answer value.
+- Added scale-matched number keys without automatic navigation, so every key maps predictably to the visible answer value; Enter confirms the current answer and advances.
+- Rebuilt account handoff so the panel immediately exposes the URL, login, password and a ready-to-copy client message without collecting an e-mail address.
+- Matched the assignment list to all five stages from the original message: GAD-7 and BDI-II, SCID, developmental interview, AQ result and childhood materials.
 - Verified that saved answers update assignment progress after leaving a test.
 - Kept demo credentials and data explicitly separated from the production architecture.
 

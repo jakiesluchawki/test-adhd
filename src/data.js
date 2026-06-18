@@ -17,6 +17,8 @@ export function getQuestionText(question, gender = "neutral") {
 export const TESTS = [
   {
     id: "adhd-start",
+    order: 6,
+    supplemental: true,
     short: "ADHD start",
     title: "Kwestionariusz startowy ADHD",
     eyebrow: "Materiał wstępny",
@@ -44,6 +46,8 @@ export const TESTS = [
   },
   {
     id: "gad7",
+    order: 0,
+    mailStep: "01A",
     short: "GAD-7",
     title: "GAD-7",
     eyebrow: "Kwestionariusz przesiewowy",
@@ -98,7 +102,41 @@ export const TESTS = [
     ],
   },
   {
+    id: "bdi2",
+    order: 1,
+    mailStep: "01B",
+    available: false,
+    short: "BDI-II",
+    title: "Inwentarz Depresji Becka (BDI-II)",
+    eyebrow: "Narzędzie licencjonowane",
+    duration: "około 10 minut",
+    image: "./assets/section-03.webp",
+    intro:
+      "Druga część pierwszego punktu z wiadomości Emilii. Formularz ocenia nasilenie objawów depresyjnych z ostatnich dwóch tygodni.",
+    context:
+      "Treść BDI-II nie jest publikowana w otwartym repozytorium. Gabinet może podłączyć formularz w wersji produkcyjnej po potwierdzeniu uprawnień do jego używania.",
+    questions: [],
+  },
+  {
+    id: "scid",
+    order: 2,
+    mailStep: "02",
+    available: false,
+    short: "SCID",
+    title: "Kwestionariusz SCID",
+    eyebrow: "Narzędzie licencjonowane",
+    duration: "około 25 minut",
+    image: "./assets/section-05.webp",
+    intro:
+      "Pytania TAK/NIE. Każdą odpowiedź TAK klient powinien uzupełnić konkretnym przykładem lub uzasadnieniem.",
+    context:
+      "Treść SCID nie jest publikowana w otwartym repozytorium. Silnik odpowiedzi TAK/NIE z komentarzem zostanie podłączony w prywatnej wersji gabinetu.",
+    questions: [],
+  },
+  {
     id: "interview",
+    order: 3,
+    mailStep: "03",
     short: "Wywiad",
     title: "Wywiad rozwojowy",
     eyebrow: "Odpowiedzi opisowe",
@@ -117,10 +155,46 @@ export const TESTS = [
       "Czy jest jeszcze coś, co psycholog powinien wiedzieć przed spotkaniem?",
     ],
   },
-];
+  {
+    id: "aq",
+    order: 4,
+    mailStep: "04",
+    short: "AQ",
+    title: "AQ — wynik testu online",
+    eyebrow: "Kwestionariusz zewnętrzny",
+    duration: "około 10 minut",
+    image: "./assets/section-03.webp",
+    externalUrl: "https://phzdrowia.pl/test-czynnika-aq-autism-spectrum-quotient/",
+    intro:
+      "Rozwiąż test AQ na wskazanej stronie, a następnie wpisz tutaj uzyskany wynik.",
+    context:
+      "Wynik jest informacją pomocniczą do omówienia podczas konsultacji. Sam test przesiewowy nie stanowi diagnozy.",
+    questions: [
+      "Wpisz wynik AQ uzyskany w teście online.",
+    ],
+  },
+  {
+    id: "childhood-materials",
+    order: 5,
+    mailStep: "05",
+    short: "Dzieciństwo",
+    title: "Materiały z dzieciństwa",
+    eyebrow: "Materiały uzupełniające",
+    duration: "około 5 minut",
+    image: "./assets/section-01.webp",
+    intro:
+      "Zbierz informacje o materiałach z pierwszych lat szkoły. Nie musisz mieć wszystkich wymienionych rzeczy.",
+    context:
+      "Wiadomość Emilii wskazuje opisy ze świadectw klas 1–3, dzienniczki uwag oraz ewentualne nagrania. W publicznym demo zapisujemy wyłącznie opis, bez przesyłania prywatnych plików.",
+    questions: [
+      "Jakie opisy lub uwagi znajdują się na świadectwach z klas 1–3?",
+      "Czy zachowały się dzienniczki uwag? Jeśli tak, opisz najważniejsze wpisy.",
+      "Czy istnieją nagrania lub inne materiały z tego okresu? Napisz, co można przekazać psychologowi.",
+    ],
+  },
+].sort((first, second) => first.order - second.order);
 
 const completedAnswers = {
-  "adhd-start": { 0: 3, 1: 2, 2: 4, 3: 4, 4: 3, 5: 3 },
   gad7: { 0: 2, 1: 1, 2: 2, 3: 2, 4: 0, 5: 2, 6: 1 },
   interview: {
     0: "Lubiłem naukę, szczególnie przedmioty ścisłe. Trudniej było mi utrzymać uwagę przy zadaniach powtarzalnych.",
@@ -129,6 +203,12 @@ const completedAnswers = {
     3: "Miałem niewielu bliskich przyjaciół, ale relacje były długie i ważne.",
     4: "Korzystam z kalendarza, list zadań i stałych rytuałów. To działa, ale kosztuje dużo energii.",
     5: "Największym problemem jest przeciążenie po dłuższym okresie intensywnej pracy.",
+  },
+  aq: { 0: "34" },
+  "childhood-materials": {
+    0: "Na świadectwach powtarzają się informacje o dużej samodzielności, aktywności i bardzo dobrych wynikach w nauce.",
+    1: "Nie zachowały się dzienniczki uwag.",
+    2: "Nie mam nagrań. Mogę spróbować odnaleźć pojedyncze dokumenty i zdjęcia.",
   },
 };
 
@@ -144,8 +224,9 @@ export function createInitialWorkspace() {
         email: "anna@example.test",
         assignedAt: "18.06.2026",
         deadline: "25.06.2026",
+        assignedTests: TESTS.filter((test) => !test.supplemental).map((test) => test.id),
         introAccepted: false,
-        answers: { "adhd-start": { 0: 3, 1: 2 }, gad7: {}, interview: {} },
+        answers: Object.fromEntries(TESTS.map((test) => [test.id, {}])),
         completedTests: [],
       },
       {
@@ -157,9 +238,10 @@ export function createInitialWorkspace() {
         email: "marek@example.test",
         assignedAt: "16.06.2026",
         deadline: "23.06.2026",
+        assignedTests: TESTS.filter((test) => !test.supplemental).map((test) => test.id),
         introAccepted: true,
         answers: completedAnswers,
-        completedTests: TESTS.map((test) => test.id),
+        completedTests: TESTS.filter((test) => test.available !== false).map((test) => test.id),
       },
     ],
   };
@@ -174,6 +256,9 @@ export const PSYCHOLOGIST = {
 };
 
 export function getTestProgress(client, test) {
+  if (test.available === false) {
+    return { answerCount: 0, total: 0, percent: 0, completed: false, unavailable: true };
+  }
   const answerCount = Object.keys(client.answers?.[test.id] || {}).filter(
     (key) => client.answers[test.id][key] !== "",
   ).length;
@@ -185,17 +270,24 @@ export function getTestProgress(client, test) {
   };
 }
 
+export function getAssignedTests(client) {
+  const assignedIds = client.assignedTests
+    || TESTS.filter((test) => !test.supplemental).map((test) => test.id);
+  return TESTS.filter((test) => assignedIds.includes(test.id));
+}
+
 export function getClientProgress(client) {
-  const answered = TESTS.reduce(
+  const availableTests = getAssignedTests(client).filter((test) => test.available !== false);
+  const answered = availableTests.reduce(
     (sum, test) => sum + getTestProgress(client, test).answerCount,
     0,
   );
-  const total = TESTS.reduce((sum, test) => sum + test.questions.length, 0);
+  const total = availableTests.reduce((sum, test) => sum + test.questions.length, 0);
   return {
     answered,
     total,
     percent: Math.round((answered / total) * 100),
-    completed: client.completedTests.length === TESTS.length,
+    completed: availableTests.every((test) => client.completedTests.includes(test.id)),
   };
 }
 

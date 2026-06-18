@@ -2,8 +2,8 @@
 
 Interaktywny prototyp panelu do przeprowadzania testów przed konsultacją psychologiczną. Zawiera dwa kompletne przepływy:
 
-- klient: logowanie, wprowadzenie, zapis postępu, pytania zamknięte i opisowe, skróty numeryczne oraz przegląd odpowiedzi;
-- psycholog: lista klientów, statusy, tworzenie kont demo z wyborem formy językowej pytań i skonsolidowany raport z drukiem do PDF.
+- klient: logowanie, wprowadzenie, zapis postępu, pytania zamknięte i opisowe, skróty numeryczne, Enter przechodzący dalej oraz przegląd odpowiedzi;
+- psycholog: lista klientów, statusy, tworzenie kont demo z wyborem formy językowej pytań, czytelne dane dostępowe z gotową wiadomością do skopiowania oraz skonsolidowany raport z drukiem do PDF.
 
 ## Demo
 
@@ -45,6 +45,16 @@ Frontend jest przygotowany do zastąpienia lokalnego store prawdziwym API. Minim
 
 Szkic modelu i polityk znajduje się w `supabase/schema.sql`.
 
-## Formularze
+## Zakres z wiadomości Emilii
 
-Demo zawiera GAD-7, autorski materiał startowy ADHD oraz przykładowy wywiad rozwojowy. Nie publikuje komercyjnych lub licencjonowanych formularzy BDI-II, SCID ani innych narzędzi. Silnik można zasilić formularzami, do których poradnia ma prawo użycia.
+Panel zachowuje kolejność materiałów z wiadomości organizacyjnej:
+
+1. GAD-7 i BDI-II;
+2. SCID;
+3. wywiad rozwojowy;
+4. wynik AQ z zewnętrznego testu;
+5. materiały z dzieciństwa.
+
+GAD-7, wywiad, wpisanie wyniku AQ i opis materiałów z dzieciństwa działają w demo. BDI-II i SCID są widoczne we właściwych miejscach, lecz wymagają podłączenia w prywatnym środowisku gabinetu — publiczne repozytorium nie zawiera treści licencjonowanych formularzy.
+
+Wersja demonstracyjna nie zbiera adresu e-mail. Po utworzeniu konta pokazuje adres panelu, login, hasło i gotową wiadomość, którą psycholog może ręcznie przekazać klientowi wybranym kanałem.

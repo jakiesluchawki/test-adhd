@@ -694,6 +694,20 @@ h1,
   background: var(--paper);
 }
 
+.assignment-row:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.assignment-row:disabled:hover {
+  background: transparent;
+}
+
+.assignment-row:disabled .assignment-number,
+.assignment-row:disabled .assignment-title-line strong {
+  color: var(--muted);
+}
+
 .assignment-number {
   color: var(--cobalt);
   font-family: "Fraunces", Georgia, serif;
@@ -764,6 +778,12 @@ h1,
 
 .status-waiting {
   border-color: var(--rule);
+  color: var(--muted);
+}
+
+.status-setup {
+  border-color: oklch(0.78 0.04 252);
+  background: oklch(0.95 0.018 252);
   color: var(--muted);
 }
 
@@ -839,6 +859,11 @@ h1,
   margin: 0;
   color: var(--muted);
   line-height: 1.55;
+}
+
+.external-test-link {
+  width: max-content;
+  margin: -12px 0 30px;
 }
 
 .test-facts {
@@ -931,6 +956,33 @@ h1,
   font-size: clamp(34px, 4vw, 52px);
   letter-spacing: -0.035em;
   line-height: 1.08;
+}
+
+.short-answer {
+  display: grid;
+  max-width: 340px;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.short-answer input {
+  min-height: 58px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 6px;
+  padding: 0 16px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 20px;
+}
+
+.short-answer input:hover,
+.short-answer input:focus {
+  border-color: var(--cobalt);
+}
+
+.short-answer small {
+  color: var(--muted);
+  font-weight: 400;
 }
 
 .answer-options {
@@ -1585,6 +1637,14 @@ h1,
   color: var(--muted);
 }
 
+.checked-test.is-unavailable {
+  color: var(--muted);
+}
+
+.checked-test.is-unavailable input {
+  opacity: 0.45;
+}
+
 .create-success > svg {
   color: var(--success);
 }
@@ -1611,6 +1671,60 @@ h1,
   margin: 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-weight: 700;
+}
+
+.credentials-box a {
+  color: var(--cobalt-dark);
+  overflow-wrap: anywhere;
+}
+
+.credentials-box .credential-value {
+  color: var(--cobalt-dark);
+  font-size: 21px;
+}
+
+.invitation-preview {
+  margin: 0 0 24px;
+}
+
+.invitation-preview > span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.invitation-preview pre {
+  margin: 0;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 18px;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.create-success-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.create-success-actions .button + .button,
+.create-success-actions + .button {
+  margin-left: 0;
+}
+
+.report-unavailable {
+  min-height: 620px;
+}
+
+.report-unavailable .context-panel {
+  margin-top: 48px;
 }
 
 .create-success .button + .button {

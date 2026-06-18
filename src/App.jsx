@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Clock3,
   Copy,
+  ExternalLink,
   FileText,
   LockKeyhole,
   LogOut,
@@ -22,6 +23,7 @@ import {
   PSYCHOLOGIST,
   TESTS,
   createInitialWorkspace,
+  getAssignedTests,
   getClientProgress,
   getGenderLabel,
   getQuestionText,
@@ -30,19 +32,33 @@ import {
 } from "./data.js";
 
 const STORAGE_KEY = "wrownowadze-testy-demo-v1";
+const PANEL_URL = "https://jakiesluchawki.github.io/test-adhd/";
 
 function loadWorkspace() {
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (!stored) return createInitialWorkspace();
     const workspace = JSON.parse(stored);
+    const freshWorkspace = createInitialWorkspace();
+    const blankAnswers = Object.fromEntries(TESTS.map((test) => [test.id, {}]));
     return {
       ...workspace,
-      clients: workspace.clients.map((client) => ({
-        ...client,
-        gender: client.gender
-          || (client.id === "anna-demo" ? "female" : client.id === "marek-demo" ? "male" : "neutral"),
-      })),
+      clients: workspace.clients.map((client) => {
+        const freshDemo = freshWorkspace.clients.find((item) => item.id === client.id);
+        return {
+          ...freshDemo,
+          ...client,
+          assignedTests: client.assignedTests || freshDemo?.assignedTests
+            || TESTS.filter((test) => !test.supplemental).map((test) => test.id),
+          answers: { ...blankAnswers, ...freshDemo?.answers, ...client.answers },
+          completedTests: Array.from(new Set([
+            ...(freshDemo?.completedTests || []),
+            ...(client.completedTests || []),
+          ])),
+          gender: client.gender
+            || (client.id === "anna-demo" ? "female" : client.id === "marek-demo" ? "male" : "neutral"),
+        };
+      }),
     };
   } catch {
     return createInitialWorkspace();
@@ -80,6 +96,7 @@ function StatusPill({ status }) {
     completed: "Ukończono",
     progress: "W trakcie",
     waiting: "Nie rozpoczęto",
+    setup: "Do podłączenia",
   };
   return <span className={`status-pill status-${status}`}>{labels[status]}</span>;
 }
@@ -281,6 +298,7 @@ function ProgressBar({ value, label }) {
 
 function ClientHome({ client, onOpenTest }) {
   const overall = getClientProgress(client);
+  const assignedTests = getAssignedTests(client);
   return (
     <main className="client-main page-width">
       <section className="client-hero">
@@ -288,8 +306,8 @@ function ClientHome({ client, onOpenTest }) {
           <p className="eyebrow">TWÓJ ZESTAW</p>
           <h1>Materiały przed konsultacją</h1>
           <p>
-            Trzy części, około 25 minut łącznie. Zacznij od dowolnej i wracaj do
-            przerwanych odpowiedzi, kiedy potrzebujesz.
+            Pięć etapów zgodnych z wiadomością Emilii. Zacznij od dostępnej
+            części i wracaj do przerwanych odpowiedzi, kiedy potrzebujesz.
           </p>
         </div>
         <div className="overall-progress">
@@ -307,9 +325,11 @@ function ClientHome({ client, onOpenTest }) {
           </div>
           <p>Termin orientacyjny: {client.deadline}</p>
         </div>
-        {TESTS.map((test, index) => {
+        {assignedTests.map((test) => {
           const progress = getTestProgress(client, test);
-          const status = progress.completed
+          const status = progress.unavailable
+            ? "setup"
+            : progress.completed
             ? "completed"
             : progress.answerCount
               ? "progress"
@@ -318,9 +338,10 @@ function ClientHome({ client, onOpenTest }) {
             <button
               className="assignment-row"
               key={test.id}
-              onClick={() => onOpenTest(test.id)}
+              disabled={test.available === false}
+              onClick={() => test.available !== false && onOpenTest(test.id)}
             >
-              <span className="assignment-number">0{index + 1}</span>
+              <span className="assignment-number">{test.mailStep}</span>
               <span className="assignment-copy">
                 <span className="assignment-title-line">
                   <strong>{test.title}</strong>
@@ -329,7 +350,11 @@ function ClientHome({ client, onOpenTest }) {
                 <span>{test.intro}</span>
                 <span className="assignment-meta">
                   <Clock3 size={15} /> {test.duration}
-                  <span>{progress.answerCount} z {progress.total} odpowiedzi</span>
+                  <span>
+                    {progress.unavailable
+                      ? "Formularz wymaga prywatnej konfiguracji gabinetu"
+                      : `${progress.answerCount} z ${progress.total} odpowiedzi`}
+                  </span>
                 </span>
               </span>
               <span className="assignment-progress" aria-hidden="true">
@@ -370,26 +395,45 @@ function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
   }, [stage, index, test.id]);
 
   useEffect(() => {
-    if (stage !== "questions" || !test.scale) return undefined;
-    const handleNumberKey = (event) => {
+    if (stage !== "questions") return undefined;
+    const handleKeyboard = (event) => {
       const target = event.target;
       if (
         event.altKey
         || event.ctrlKey
         || event.metaKey
-        || (target instanceof HTMLInputElement && target.type !== "radio")
+        || target?.isContentEditable
+      ) return;
+
+      if (event.key === "Enter") {
+        if (
+          target instanceof HTMLTextAreaElement
+          || target instanceof HTMLSelectElement
+          || target instanceof HTMLButtonElement
+          || target instanceof HTMLAnchorElement
+          || answer === undefined
+          || answer === ""
+        ) return;
+        event.preventDefault();
+        if (index < test.questions.length - 1) setIndex(index + 1);
+        else setStage("review");
+        return;
+      }
+
+      if (!test.scale) return;
+      if (
+        (target instanceof HTMLInputElement && target.type !== "radio")
         || target instanceof HTMLTextAreaElement
         || target instanceof HTMLSelectElement
-        || target?.isContentEditable
       ) return;
       const option = test.scale.find((item) => String(item.value) === event.key);
       if (!option) return;
       event.preventDefault();
       onAnswer(test.id, index, option.value);
     };
-    window.addEventListener("keydown", handleNumberKey);
-    return () => window.removeEventListener("keydown", handleNumberKey);
-  }, [stage, index, test, onAnswer]);
+    window.addEventListener("keydown", handleKeyboard);
+    return () => window.removeEventListener("keydown", handleKeyboard);
+  }, [stage, index, test, answer, onAnswer]);
 
   const goNext = () => {
     if (index < test.questions.length - 1) setIndex(index + 1);
@@ -414,6 +458,11 @@ function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
                 <p>{test.context}</p>
               </div>
             </div>
+            {test.externalUrl && (
+              <a className="button button-secondary external-test-link" href={test.externalUrl} target="_blank" rel="noreferrer">
+                Otwórz test AQ <ExternalLink size={17} />
+              </a>
+            )}
             <dl className="test-facts">
               <div><dt>Czas</dt><dd>{test.duration}</dd></div>
               <div><dt>Pytania</dt><dd>{test.questions.length}</dd></div>
@@ -513,7 +562,7 @@ function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
               <legend>
                 <span>Wybierz jedną odpowiedź</span>
                 <span className="keyboard-hint">
-                  Klawiatura: {test.scale.map((option) => option.value).join(" · ")}
+                  Klawiatura: {test.scale.map((option) => option.value).join(" · ")} · Enter → dalej
                 </span>
               </legend>
               {test.scale.map((option) => (
@@ -534,6 +583,20 @@ function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
                 </label>
               ))}
             </fieldset>
+          ) : test.id === "aq" ? (
+            <label className="short-answer">
+              <span>Wynik AQ</span>
+              <input
+                type="number"
+                min="0"
+                max="50"
+                inputMode="numeric"
+                value={answer || ""}
+                onChange={(event) => onAnswer(test.id, index, event.target.value)}
+                placeholder="0–50"
+              />
+              <small>Po wpisaniu wyniku naciśnij Enter, aby przejść dalej.</small>
+            </label>
           ) : (
             <label className="long-answer">
               <span>Twoja odpowiedź</span>
@@ -571,7 +634,9 @@ function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
 
 function ClientPortal({ client, setWorkspace, onLogout }) {
   const [activeTestId, setActiveTestId] = useState(null);
-  const activeTest = TESTS.find((test) => test.id === activeTestId);
+  const activeTest = getAssignedTests(client).find(
+    (test) => test.id === activeTestId && test.available !== false,
+  );
 
   const updateClient = (transform) => {
     setWorkspace((current) => ({
@@ -669,6 +734,26 @@ function ClientIndex({ clients, selectedId, onSelect, onCreate }) {
 function TestReport({ client, test }) {
   const answers = client.answers[test.id] || {};
   const score = getScore(test, answers);
+  if (test.available === false) {
+    return (
+      <section className="report-section report-unavailable">
+        <header className="report-section-heading">
+          <div>
+            <p className="eyebrow">{test.eyebrow}</p>
+            <h1>{test.title}</h1>
+            <p>{test.intro}</p>
+          </div>
+        </header>
+        <div className="context-panel">
+          <LockKeyhole size={22} />
+          <div>
+            <strong>Formularz czeka na prywatne podłączenie</strong>
+            <p>{test.context}</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
   return (
     <section className="report-section">
       <header className="report-section-heading">
@@ -710,6 +795,7 @@ function TestReport({ client, test }) {
 
 function ReportSummary({ client }) {
   const overall = getClientProgress(client);
+  const assignedTests = getAssignedTests(client);
   return (
     <section className="report-summary">
       <div className="report-hero-copy">
@@ -741,14 +827,24 @@ function ReportSummary({ client }) {
             <h2>Przebieg i wyniki</h2>
           </div>
         </div>
-        {TESTS.map((test) => {
+        {assignedTests.map((test) => {
           const progress = getTestProgress(client, test);
           const score = getScore(test, client.answers[test.id]);
           return (
             <article key={test.id}>
               <p>{test.short}</p>
-              <strong>{score ? `${score.value} / ${score.max}` : `${progress.answerCount} / ${progress.total}`}</strong>
-              <span>{score?.interpretation || (progress.completed ? "Odpowiedzi opisowe ukończone" : "Materiał w trakcie")}</span>
+              <strong>
+                {progress.unavailable
+                  ? "—"
+                  : score
+                    ? `${score.value} / ${score.max}`
+                    : `${progress.answerCount} / ${progress.total}`}
+              </strong>
+              <span>
+                {progress.unavailable
+                  ? "Do podłączenia przez gabinet"
+                  : score?.interpretation || (progress.completed ? "Odpowiedzi ukończone" : "Materiał w trakcie")}
+              </span>
             </article>
           );
         })}
@@ -759,13 +855,14 @@ function ReportSummary({ client }) {
 
 function ReportView({ client }) {
   const [section, setSection] = useState("summary");
+  const assignedTests = getAssignedTests(client);
   useEffect(() => setSection("summary"), [client.id]);
   return (
     <main className="report-view">
       <div className="report-toolbar">
         <nav aria-label="Sekcje raportu">
           <button className={section === "summary" ? "active" : ""} onClick={() => setSection("summary")}>Podsumowanie</button>
-          {TESTS.map((test) => (
+          {assignedTests.map((test) => (
             <button key={test.id} className={section === test.id ? "active" : ""} onClick={() => setSection(test.id)}>{test.short}</button>
           ))}
         </nav>
@@ -777,7 +874,7 @@ function ReportView({ client }) {
         {section === "summary" ? (
           <ReportSummary client={client} />
         ) : (
-          <TestReport client={client} test={TESTS.find((test) => test.id === section)} />
+          <TestReport client={client} test={assignedTests.find((test) => test.id === section)} />
         )}
       </div>
     </main>
@@ -786,10 +883,13 @@ function ReportView({ client }) {
 
 function CreateClient({ onCreate, onCancel }) {
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [gender, setGender] = useState("");
   const [created, setCreated] = useState(null);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState("");
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [created]);
 
   const submit = (event) => {
     event.preventDefault();
@@ -800,12 +900,12 @@ function CreateClient({ onCreate, onCancel }) {
     const client = {
       id: `${Date.now()}`,
       name: name.trim(),
-      email: email.trim(),
       gender,
       login,
       password,
       assignedAt: new Date().toLocaleDateString("pl-PL"),
       deadline: "do ustalenia",
+      assignedTests: TESTS.filter((test) => !test.supplemental).map((test) => test.id),
       introAccepted: false,
       answers: Object.fromEntries(TESTS.map((test) => [test.id, {}])),
       completedTests: [],
@@ -814,9 +914,18 @@ function CreateClient({ onCreate, onCancel }) {
     setCreated(client);
   };
 
+  const invitationText = created
+    ? `Dzień dobry,\n\nproszę uzupełnić materiały przed konsultacją pod adresem:\n${PANEL_URL}\n\nLogin: ${created.login}\nHasło: ${created.password}\n\nPostęp zapisuje się automatycznie. Można przerwać i wrócić później.`
+    : "";
+
+  const copyInvitation = async () => {
+    await navigator.clipboard.writeText(invitationText);
+    setCopied("message");
+  };
+
   const copyCredentials = async () => {
-    await navigator.clipboard.writeText(`Login: ${created.login}\nHasło: ${created.password}`);
-    setCopied(true);
+    await navigator.clipboard.writeText(`${PANEL_URL}\nLogin: ${created.login}\nHasło: ${created.password}`);
+    setCopied("credentials");
   };
 
   if (created) {
@@ -824,17 +933,27 @@ function CreateClient({ onCreate, onCancel }) {
       <main className="create-client-page">
         <section className="create-success">
           <CheckCircle2 size={32} />
-          <p className="eyebrow">KONTO DEMO UTWORZONE</p>
-          <h1>{created.name}</h1>
-          <p>Przekaż klientowi dane innym kanałem niż zaproszenie z linkiem.</p>
+          <p className="eyebrow">KONTO GOTOWE</p>
+          <h1>Dane dostępu</h1>
+          <p><strong>{created.name}</strong>. Skopiuj gotową wiadomość i wyślij ją klientowi wybranym kanałem.</p>
           <dl className="credentials-box">
-            <div><dt>Login</dt><dd>{created.login}</dd></div>
-            <div><dt>Hasło</dt><dd>{created.password}</dd></div>
+            <div><dt>Adres panelu</dt><dd><a href={PANEL_URL} target="_blank" rel="noreferrer">{PANEL_URL}</a></dd></div>
+            <div><dt>Login</dt><dd className="credential-value">{created.login}</dd></div>
+            <div><dt>Hasło</dt><dd className="credential-value">{created.password}</dd></div>
             <div><dt>Forma pytań</dt><dd>{getGenderLabel(created.gender)}</dd></div>
           </dl>
-          <button className="button button-primary" onClick={copyCredentials}>
-            <Copy size={17} /> {copied ? "Skopiowano" : "Kopiuj dane"}
-          </button>
+          <div className="invitation-preview">
+            <span>Gotowa wiadomość dla klienta</span>
+            <pre>{invitationText}</pre>
+          </div>
+          <div className="create-success-actions">
+            <button className="button button-primary" onClick={copyInvitation}>
+              <Copy size={17} /> {copied === "message" ? "Wiadomość skopiowana" : "Kopiuj całą wiadomość"}
+            </button>
+            <button className="button button-secondary" onClick={copyCredentials}>
+              <Copy size={17} /> {copied === "credentials" ? "Dane skopiowane" : "Kopiuj same dane"}
+            </button>
+          </div>
           <button className="button button-secondary" onClick={onCancel}>Wróć do klientów</button>
         </section>
       </main>
@@ -850,7 +969,6 @@ function CreateClient({ onCreate, onCancel }) {
         <p>W demo konto i odpowiedzi pozostaną wyłącznie w tej przeglądarce.</p>
         <form onSubmit={submit}>
           <label><span>Imię i nazwisko</span><input required value={name} onChange={(event) => setName(event.target.value)} placeholder="np. Aleksandra Nowak" /></label>
-          <label><span>E-mail</span><input required type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="aleksandra@example.com" /></label>
           <fieldset className="gender-fieldset">
             <legend>Płeć i forma językowa pytań</legend>
             <p>Ustawienie zmienia wyłącznie odmianę treści, nie wpływa na wynik.</p>
@@ -872,8 +990,16 @@ function CreateClient({ onCreate, onCancel }) {
             </div>
           </fieldset>
           <fieldset>
-            <legend>Przydzielone części</legend>
-            {TESTS.map((test) => <label className="checked-test" key={test.id}><input type="checkbox" checked readOnly /><span><strong>{test.title}</strong><small>{test.duration}</small></span></label>)}
+            <legend>Zakres z wiadomości Emilii</legend>
+            {TESTS.filter((test) => !test.supplemental).map((test) => (
+              <label className={`checked-test ${test.available === false ? "is-unavailable" : ""}`} key={test.id}>
+                <input type="checkbox" checked={test.available !== false} readOnly disabled={test.available === false} />
+                <span>
+                  <strong>{test.mailStep} · {test.title}</strong>
+                  <small>{test.available === false ? "Do podłączenia w prywatnej wersji gabinetu" : test.duration}</small>
+                </span>
+              </label>
+            ))}
           </fieldset>
           <button className="button button-primary" type="submit"><Plus size={18} /> Utwórz konto demo</button>
         </form>
