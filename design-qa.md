@@ -6,7 +6,7 @@
 - Implementation screenshots: `qa-login-desktop.png`, `qa-client-home-desktop.png`, `qa-question-desktop.png`, `qa-psych-desktop.png`, `qa-psych-gad-desktop.png`, plus corresponding mobile captures. These files remain local and are ignored by Git.
 - Desktop viewport: 1280 x 720, full-page captures where needed.
 - Mobile viewport: 390 x 844.
-- States: login, client introduction, selectable assignment list, gendered GAD-7 and BDI-II flows, SCID with conditional justification, numeric keyboard input, Enter navigation, saved progress, psychologist summary, test report, new-client creation and credential handoff.
+- States: login, client introduction, selectable assignment list, gendered GAD-7 and BDI-II flows, SCID with conditional justification, numeric keyboard input, Enter navigation, saved progress, psychologist summary, test report, client search, contact editing, assignment editing, credential recovery, password regeneration, deletion confirmation, empty client state and new-client creation.
 
 ## Full-view comparison evidence
 
@@ -50,6 +50,7 @@ No actionable P0, P1 or P2 findings remain.
 - Made all six forms independently selectable, with the complete set selected by default and one-click select-all/clear controls.
 - Added the 21-part BDI-II flow with gender-aware answer wording, source-form scoring thresholds and an immediate safety notice for answers indicating suicidal thoughts.
 - Added all 106 SCID questions; every TAK answer requires a written example or justification before the next question becomes available.
+- Added operational client management: searchable contact records, editable assignments and deadlines, reusable access handoff, password regeneration, inline destructive confirmation and a recoverable empty state.
 - Verified that saved answers update assignment progress after leaving a test.
 - Kept demo credentials and data explicitly separated from the production architecture.
 

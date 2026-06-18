@@ -11,12 +11,20 @@ import {
   FileText,
   LockKeyhole,
   LogOut,
+  Mail,
+  Phone,
   Plus,
   Printer,
+  RefreshCw,
   RotateCcw,
+  Save,
+  Search,
+  Settings2,
   ShieldCheck,
+  Trash2,
   UserRound,
   UsersRound,
+  X,
 } from "lucide-react";
 import {
   GENDER_OPTIONS,
@@ -36,6 +44,33 @@ import {
 
 const STORAGE_KEY = "wrownowadze-testy-demo-v1";
 const PANEL_URL = "https://jakiesluchawki.github.io/test-adhd/";
+const CONTACT_OPTIONS = [
+  { value: "none", label: "Bez preferencji" },
+  { value: "email", label: "E-mail" },
+  { value: "phone", label: "Telefon" },
+  { value: "text", label: "SMS lub komunikator" },
+];
+
+function generatePassword() {
+  return `spokojny-${Math.floor(1000 + Math.random() * 9000)}`;
+}
+
+function buildInvitation(client) {
+  return `Dzień dobry,\n\nproszę uzupełnić materiały przed konsultacją pod adresem:\n${PANEL_URL}\n\nLogin: ${client.login}\nHasło: ${client.password}\n\nPostęp zapisuje się automatycznie. Można przerwać i wrócić później.`;
+}
+
+function normalizePhone(value = "") {
+  return value.replace(/[^\d+]/g, "");
+}
+
+function hasDuplicateContact(clients, currentId, email, phone) {
+  const normalizedEmail = email.trim().toLocaleLowerCase("pl-PL");
+  const normalizedPhone = normalizePhone(phone);
+  return clients.find((client) => client.id !== currentId && (
+    (normalizedEmail && client.email?.toLocaleLowerCase("pl-PL") === normalizedEmail)
+    || (normalizedPhone && normalizePhone(client.phone) === normalizedPhone)
+  ));
+}
 
 function loadWorkspace() {
   try {
@@ -60,6 +95,10 @@ function loadWorkspace() {
           ])),
           gender: client.gender
             || (client.id === "anna-demo" ? "female" : client.id === "marek-demo" ? "male" : "neutral"),
+          email: client.email ?? freshDemo?.email ?? "",
+          phone: client.phone ?? freshDemo?.phone ?? "",
+          contactPreference: client.contactPreference ?? freshDemo?.contactPreference ?? "none",
+          notes: client.notes ?? freshDemo?.notes ?? "",
         };
       }),
     };
@@ -139,7 +178,11 @@ function LoginScreen({ workspace, onLogin, onReset }) {
       setPassword(PSYCHOLOGIST.password);
       return;
     }
-    const client = workspace.clients.find((item) => item.id === "anna-demo");
+    const client = workspace.clients.find((item) => item.id === "anna-demo") || workspace.clients[0];
+    if (!client) {
+      setError("Brak konta klienta. Zaloguj się jako psycholog i utwórz nowe konto.");
+      return;
+    }
     setLogin(client.login);
     setPassword(client.password);
   };
@@ -752,6 +795,12 @@ function ClientPortal({ client, setWorkspace, onLogout }) {
 }
 
 function ClientIndex({ clients, selectedId, onSelect, onCreate }) {
+  const [query, setQuery] = useState("");
+  const normalizedQuery = query.trim().toLocaleLowerCase("pl-PL");
+  const visibleClients = clients.filter((client) => [client.name, client.email, client.phone]
+    .filter(Boolean)
+    .some((value) => value.toLocaleLowerCase("pl-PL").includes(normalizedQuery)));
+
   return (
     <aside className="client-index">
       <div className="client-index-heading">
@@ -763,8 +812,20 @@ function ClientIndex({ clients, selectedId, onSelect, onCreate }) {
           <Plus size={18} />
         </button>
       </div>
+      <label className="client-search">
+        <span>Szukaj klienta</span>
+        <span className="client-search-control">
+          <Search size={16} aria-hidden="true" />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Imię, e-mail lub telefon"
+          />
+        </span>
+      </label>
       <div className="client-index-list">
-        {clients.map((client) => {
+        {visibleClients.map((client) => {
           const progress = getClientProgress(client);
           const status = progress.completed ? "completed" : progress.answered ? "progress" : "waiting";
           return (
@@ -782,6 +843,12 @@ function ClientIndex({ clients, selectedId, onSelect, onCreate }) {
             </button>
           );
         })}
+        {visibleClients.length === 0 && (
+          <div className="client-index-empty">
+            <strong>Brak wyników</strong>
+            <span>Sprawdź pisownię albo wyczyść wyszukiwanie.</span>
+          </div>
+        )}
       </div>
     </aside>
   );
@@ -859,6 +926,8 @@ function TestReport({ client, test }) {
 function ReportSummary({ client }) {
   const overall = getClientProgress(client);
   const assignedTests = getAssignedTests(client);
+  const contactPreference = CONTACT_OPTIONS.find((option) => option.value === client.contactPreference)?.label
+    || CONTACT_OPTIONS[0].label;
   return (
     <section className="report-summary">
       <div className="report-hero-copy">
@@ -871,6 +940,9 @@ function ReportSummary({ client }) {
         <dl>
           <div><dt>Klient</dt><dd>{client.name}</dd></div>
           <div><dt>Forma pytań</dt><dd>{getGenderLabel(client.gender)}</dd></div>
+          <div><dt>E-mail</dt><dd>{client.email ? <a href={`mailto:${client.email}`}>{client.email}</a> : "Nie podano"}</dd></div>
+          <div><dt>Telefon</dt><dd>{client.phone ? <a href={`tel:${client.phone.replace(/\s/g, "")}`}>{client.phone}</a> : "Nie podano"}</dd></div>
+          <div><dt>Preferowany kontakt</dt><dd>{contactPreference}</dd></div>
           <div><dt>Przydzielono</dt><dd>{client.assignedAt}</dd></div>
           <div><dt>Status</dt><dd>{overall.completed ? "Ukończono" : `W trakcie, ${overall.percent}%`}</dd></div>
         </dl>
@@ -916,7 +988,7 @@ function ReportSummary({ client }) {
   );
 }
 
-function ReportView({ client }) {
+function ReportView({ client, onManage }) {
   const [section, setSection] = useState("summary");
   const assignedTests = getAssignedTests(client);
   useEffect(() => setSection("summary"), [client.id]);
@@ -929,9 +1001,14 @@ function ReportView({ client }) {
             <button key={test.id} className={section === test.id ? "active" : ""} onClick={() => setSection(test.id)}>{test.short}</button>
           ))}
         </nav>
-        <button className="button button-secondary print-button" onClick={() => window.print()}>
-          <Printer size={17} /> Drukuj / PDF
-        </button>
+        <div className="report-toolbar-actions">
+          <button className="button button-secondary" onClick={onManage}>
+            <Settings2 size={17} /> Dane klienta
+          </button>
+          <button className="button button-secondary print-button" onClick={() => window.print()}>
+            <Printer size={17} /> Drukuj / PDF
+          </button>
+        </div>
       </div>
       <div className="report-paper">
         {section === "summary" ? (
@@ -944,9 +1021,15 @@ function ReportView({ client }) {
   );
 }
 
-function CreateClient({ onCreate, onCancel }) {
+function CreateClient({ clients, onCreate, onCancel }) {
   const [name, setName] = useState("");
   const [gender, setGender] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [contactPreference, setContactPreference] = useState("none");
+  const [deadline, setDeadline] = useState("");
+  const [notes, setNotes] = useState("");
+  const [formError, setFormError] = useState("");
   const [created, setCreated] = useState(null);
   const [copied, setCopied] = useState("");
   const assignableTests = TESTS.filter((test) => !test.supplemental);
@@ -958,18 +1041,36 @@ function CreateClient({ onCreate, onCancel }) {
 
   const submit = (event) => {
     event.preventDefault();
+    setFormError("");
+    if (!email.trim() && !phone.trim()) {
+      setFormError("Podaj e-mail lub numer telefonu klienta.");
+      return;
+    }
+    const duplicate = hasDuplicateContact(clients, null, email, phone);
+    if (duplicate) {
+      setFormError(`Ten kontakt jest już przypisany do konta: ${duplicate.name}.`);
+      return;
+    }
     const normalized = name.trim().toLocaleLowerCase("pl-PL").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z\s]/g, "");
     const parts = normalized.split(/\s+/).filter(Boolean);
-    const login = `${parts[0] || "klient"}.${parts.at(-1)?.[0] || "x"}${Math.floor(10 + Math.random() * 90)}`;
-    const password = `spokojny-${Math.floor(1000 + Math.random() * 9000)}`;
+    const loginPrefix = `${parts[0] || "klient"}.${parts.at(-1)?.[0] || "x"}`;
+    let login = "";
+    do {
+      login = `${loginPrefix}${Math.floor(1000 + Math.random() * 9000)}`;
+    } while (clients.some((client) => client.login === login));
+    const password = generatePassword();
     const client = {
       id: `${Date.now()}`,
       name: name.trim(),
       gender,
       login,
       password,
+      email: email.trim(),
+      phone: phone.trim(),
+      contactPreference,
+      notes: notes.trim(),
       assignedAt: new Date().toLocaleDateString("pl-PL"),
-      deadline: "do ustalenia",
+      deadline: deadline.trim() || "do ustalenia",
       assignedTests: selectedTests,
       introAccepted: false,
       answers: Object.fromEntries(TESTS.map((test) => [test.id, {}])),
@@ -979,9 +1080,7 @@ function CreateClient({ onCreate, onCancel }) {
     setCreated(client);
   };
 
-  const invitationText = created
-    ? `Dzień dobry,\n\nproszę uzupełnić materiały przed konsultacją pod adresem:\n${PANEL_URL}\n\nLogin: ${created.login}\nHasło: ${created.password}\n\nPostęp zapisuje się automatycznie. Można przerwać i wrócić później.`
-    : "";
+  const invitationText = created ? buildInvitation(created) : "";
 
   const copyInvitation = async () => {
     await navigator.clipboard.writeText(invitationText);
@@ -1005,6 +1104,8 @@ function CreateClient({ onCreate, onCancel }) {
             <div><dt>Adres panelu</dt><dd><a href={PANEL_URL} target="_blank" rel="noreferrer">{PANEL_URL}</a></dd></div>
             <div><dt>Login</dt><dd className="credential-value">{created.login}</dd></div>
             <div><dt>Hasło</dt><dd className="credential-value">{created.password}</dd></div>
+            <div><dt>Kontakt</dt><dd>{created.email || created.phone}</dd></div>
+            <div><dt>Termin</dt><dd>{created.deadline}</dd></div>
             <div><dt>Forma pytań</dt><dd>{getGenderLabel(created.gender)}</dd></div>
           </dl>
           <div className="invitation-preview">
@@ -1033,7 +1134,38 @@ function CreateClient({ onCreate, onCancel }) {
         <h1>Przydziel zestaw testów</h1>
         <p>W demo konto i odpowiedzi pozostaną wyłącznie w tej przeglądarce.</p>
         <form onSubmit={submit}>
-          <label><span>Imię i nazwisko</span><input required value={name} onChange={(event) => setName(event.target.value)} placeholder="np. Aleksandra Nowak" /></label>
+          <label><span>Imię i nazwisko</span><input required autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} placeholder="np. Aleksandra Nowak" /></label>
+          <fieldset className="contact-fieldset">
+            <legend>Dane kontaktowe</legend>
+            <p>Podaj przynajmniej e-mail albo telefon. Dane służą wyłącznie do organizacji kontaktu.</p>
+            <div className="form-grid-two">
+              <label>
+                <span>E-mail</span>
+                <input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="aleksandra@example.com" />
+              </label>
+              <label>
+                <span>Telefon</span>
+                <input type="tel" autoComplete="tel" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="+48 500 000 000" />
+              </label>
+            </div>
+            <div className="form-grid-two">
+              <label>
+                <span>Preferowany kontakt</span>
+                <select value={contactPreference} onChange={(event) => setContactPreference(event.target.value)}>
+                  {CONTACT_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                </select>
+              </label>
+              <label>
+                <span>Termin orientacyjny</span>
+                <input value={deadline} onChange={(event) => setDeadline(event.target.value)} placeholder="np. 25.06.2026" />
+              </label>
+            </div>
+            <label>
+              <span>Notatka organizacyjna</span>
+              <textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows="3" placeholder="Np. preferuje kontakt pisemny" />
+            </label>
+            {formError && <p className="form-error">{formError}</p>}
+          </fieldset>
           <fieldset className="gender-fieldset">
             <legend>Płeć i forma językowa pytań</legend>
             <p>Ustawienie zmienia wyłącznie odmianę treści, nie wpływa na wynik.</p>
@@ -1088,10 +1220,230 @@ function CreateClient({ onCreate, onCancel }) {
   );
 }
 
+function ClientManagement({ client, clients, onSave, onDelete, onClose }) {
+  const assignableTests = TESTS.filter((test) => !test.supplemental);
+  const [name, setName] = useState(client.name);
+  const [gender, setGender] = useState(client.gender);
+  const [email, setEmail] = useState(client.email || "");
+  const [phone, setPhone] = useState(client.phone || "");
+  const [contactPreference, setContactPreference] = useState(client.contactPreference || "none");
+  const [deadline, setDeadline] = useState(client.deadline || "");
+  const [notes, setNotes] = useState(client.notes || "");
+  const [password, setPassword] = useState(client.password);
+  const [selectedTests, setSelectedTests] = useState(client.assignedTests || []);
+  const [formError, setFormError] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const [copied, setCopied] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  useEffect(() => {
+    setName(client.name);
+    setGender(client.gender);
+    setEmail(client.email || "");
+    setPhone(client.phone || "");
+    setContactPreference(client.contactPreference || "none");
+    setDeadline(client.deadline || "");
+    setNotes(client.notes || "");
+    setPassword(client.password);
+    setSelectedTests(client.assignedTests || []);
+    setFormError("");
+    setFeedback("");
+    setCopied("");
+    setConfirmDelete(false);
+  }, [client.id]);
+
+  const draftClient = {
+    ...client,
+    name: name.trim(),
+    gender,
+    email: email.trim(),
+    phone: phone.trim(),
+    contactPreference,
+    deadline: deadline.trim() || "do ustalenia",
+    notes: notes.trim(),
+    password,
+    assignedTests: selectedTests,
+  };
+  const invitationText = buildInvitation(draftClient);
+
+  const submit = (event) => {
+    event.preventDefault();
+    setFormError("");
+    setFeedback("");
+    if (!draftClient.name) {
+      setFormError("Podaj imię i nazwisko klienta.");
+      return;
+    }
+    if (!draftClient.email && !draftClient.phone) {
+      setFormError("Podaj e-mail lub numer telefonu klienta.");
+      return;
+    }
+    const duplicate = hasDuplicateContact(clients, client.id, draftClient.email, draftClient.phone);
+    if (duplicate) {
+      setFormError(`Ten kontakt jest już przypisany do konta: ${duplicate.name}.`);
+      return;
+    }
+    if (!selectedTests.length) {
+      setFormError("Przydziel co najmniej jeden formularz.");
+      return;
+    }
+    onSave({
+      ...draftClient,
+      updatedAt: new Date().toLocaleString("pl-PL"),
+    });
+    setFeedback("Zmiany zapisane.");
+  };
+
+  const copyInvitation = async () => {
+    await navigator.clipboard.writeText(invitationText);
+    setCopied("message");
+  };
+
+  const copyCredentials = async () => {
+    await navigator.clipboard.writeText(`${PANEL_URL}\nLogin: ${client.login}\nHasło: ${password}`);
+    setCopied("credentials");
+  };
+
+  const regeneratePassword = () => {
+    const nextPassword = generatePassword();
+    setPassword(nextPassword);
+    onSave({
+      ...client,
+      password: nextPassword,
+      updatedAt: new Date().toLocaleString("pl-PL"),
+    });
+    setFeedback("Nowe hasło jest aktywne. Możesz od razu skopiować dane dostępowe.");
+  };
+
+  return (
+    <main className="client-management">
+      <form onSubmit={submit}>
+        <header className="management-header">
+          <div>
+            <button className="back-link" type="button" onClick={onClose}><ArrowLeft size={18} /> Wróć do raportu</button>
+            <p className="eyebrow">KARTOTEKA KLIENTA</p>
+            <h1>Dane i dostęp</h1>
+            <p>Kontakt, przydzielone materiały i dane logowania w jednym miejscu.</p>
+          </div>
+          <button className="button button-primary" type="submit"><Save size={18} /> Zapisz zmiany</button>
+        </header>
+
+        {feedback && <p className="form-success" role="status"><CheckCircle2 size={17} /> {feedback}</p>}
+        {formError && <p className="form-error management-error" role="alert">{formError}</p>}
+
+        <section className="management-section">
+          <div className="management-section-heading">
+            <span>01</span>
+            <div><h2>Dane klienta</h2><p>Informacje organizacyjne widoczne wyłącznie w panelu psychologa.</p></div>
+          </div>
+          <div className="management-fields">
+            <label><span>Imię i nazwisko</span><input required autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} /></label>
+            <label>
+              <span>Forma językowa pytań</span>
+              <select value={gender} onChange={(event) => setGender(event.target.value)}>
+                {GENDER_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+            </label>
+            <label><span>E-mail</span><input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="klient@example.com" /></label>
+            <label><span>Telefon</span><input type="tel" autoComplete="tel" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="+48 500 000 000" /></label>
+            <label>
+              <span>Preferowany kontakt</span>
+              <select value={contactPreference} onChange={(event) => setContactPreference(event.target.value)}>
+                {CONTACT_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+            </label>
+            <label><span>Termin orientacyjny</span><input value={deadline} onChange={(event) => setDeadline(event.target.value)} placeholder="np. 25.06.2026" /></label>
+            <label className="management-field-wide"><span>Notatka organizacyjna</span><textarea rows="3" value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Np. preferuje kontakt pisemny" /></label>
+          </div>
+        </section>
+
+        <section className="management-section">
+          <div className="management-section-heading">
+            <span>02</span>
+            <div><h2>Przydzielone formularze</h2><p>Zmiana zakresu nie kasuje zapisanych odpowiedzi.</p></div>
+          </div>
+          <div className="management-assignment">
+            <div className="assignment-controls">
+              <span>{selectedTests.length} z {assignableTests.length} formularzy</span>
+              <div>
+                <button type="button" onClick={() => setSelectedTests(assignableTests.map((test) => test.id))}>Zaznacz wszystkie</button>
+                <button type="button" onClick={() => setSelectedTests([])}>Wyczyść</button>
+              </div>
+            </div>
+            {assignableTests.map((test) => (
+              <label className="checked-test" key={test.id}>
+                <input
+                  type="checkbox"
+                  checked={selectedTests.includes(test.id)}
+                  onChange={() => setSelectedTests((current) => current.includes(test.id)
+                    ? current.filter((id) => id !== test.id)
+                    : [...current, test.id])}
+                />
+                <span><strong>{test.mailStep} · {test.title}</strong><small>{test.duration}</small></span>
+              </label>
+            ))}
+          </div>
+        </section>
+
+        <section className="management-section">
+          <div className="management-section-heading">
+            <span>03</span>
+            <div><h2>Dostęp do panelu</h2><p>Hasło można odświeżyć i przekazać klientowi bez automatycznej wysyłki.</p></div>
+          </div>
+          <dl className="credentials-box management-credentials">
+            <div><dt>Adres panelu</dt><dd><a href={PANEL_URL} target="_blank" rel="noreferrer">{PANEL_URL}</a></dd></div>
+            <div><dt>Login</dt><dd className="credential-value">{client.login}</dd></div>
+            <div><dt>Hasło</dt><dd className="credential-value">{password}</dd></div>
+          </dl>
+          <div className="management-access-actions">
+            <button className="button button-secondary" type="button" onClick={copyInvitation}><Copy size={17} /> {copied === "message" ? "Wiadomość skopiowana" : "Kopiuj wiadomość dla klienta"}</button>
+            <button className="button button-secondary" type="button" onClick={copyCredentials}><Copy size={17} /> {copied === "credentials" ? "Dane skopiowane" : "Kopiuj dane dostępowe"}</button>
+            <button className="button button-secondary" type="button" onClick={regeneratePassword}><RefreshCw size={17} /> Wygeneruj i aktywuj nowe hasło</button>
+          </div>
+        </section>
+
+        <section className="management-section danger-section">
+          <div className="management-section-heading">
+            <span>04</span>
+            <div><h2>Usunięcie klienta</h2><p>Ta operacja usuwa konto i wszystkie zapisane odpowiedzi z wersji demonstracyjnej.</p></div>
+          </div>
+          {!confirmDelete ? (
+            <button className="button button-danger" type="button" onClick={() => setConfirmDelete(true)}><Trash2 size={17} /> Usuń klienta</button>
+          ) : (
+            <div className="delete-confirmation" role="alert">
+              <div><strong>Usunąć konto {client.name}?</strong><p>Tej operacji nie można cofnąć.</p></div>
+              <div>
+                <button className="button button-secondary" type="button" onClick={() => setConfirmDelete(false)}><X size={17} /> Anuluj</button>
+                <button className="button button-danger" type="button" onClick={() => onDelete(client.id)}><Trash2 size={17} /> Usuń trwale</button>
+              </div>
+            </div>
+          )}
+        </section>
+
+        <div className="management-save-footer">
+          <button className="button button-primary" type="submit"><Save size={18} /> Zapisz zmiany</button>
+        </div>
+      </form>
+    </main>
+  );
+}
+
 function PsychologistPortal({ workspace, setWorkspace, onLogout }) {
   const [selectedId, setSelectedId] = useState(workspace.clients[1]?.id || workspace.clients[0]?.id);
   const [creating, setCreating] = useState(false);
+  const [managing, setManaging] = useState(false);
   const selected = workspace.clients.find((client) => client.id === selectedId) || workspace.clients[0];
+
+  const deleteClient = (clientId) => {
+    const remaining = workspace.clients.filter((client) => client.id !== clientId);
+    setWorkspace((current) => ({
+      ...current,
+      clients: current.clients.filter((client) => client.id !== clientId),
+    }));
+    setSelectedId(remaining[0]?.id || null);
+    setManaging(false);
+    setCreating(false);
+  };
 
   return (
     <div className="psych-shell">
@@ -1103,19 +1455,39 @@ function PsychologistPortal({ workspace, setWorkspace, onLogout }) {
         <ClientIndex
           clients={workspace.clients}
           selectedId={creating ? null : selectedId}
-          onCreate={() => setCreating(true)}
-          onSelect={(id) => { setSelectedId(id); setCreating(false); }}
+          onCreate={() => { setCreating(true); setManaging(false); }}
+          onSelect={(id) => { setSelectedId(id); setCreating(false); setManaging(false); }}
         />
         {creating ? (
           <CreateClient
+            clients={workspace.clients}
             onCancel={() => setCreating(false)}
             onCreate={(client) => {
               setWorkspace((current) => ({ ...current, clients: [...current.clients, client] }));
               setSelectedId(client.id);
             }}
           />
+        ) : managing && selected ? (
+          <ClientManagement
+            client={selected}
+            clients={workspace.clients}
+            onClose={() => setManaging(false)}
+            onSave={(updatedClient) => setWorkspace((current) => ({
+              ...current,
+              clients: current.clients.map((client) => client.id === updatedClient.id ? updatedClient : client),
+            }))}
+            onDelete={deleteClient}
+          />
+        ) : selected ? (
+          <ReportView client={selected} onManage={() => setManaging(true)} />
         ) : (
-          <ReportView client={selected} />
+          <main className="empty-clients">
+            <UsersRound size={36} />
+            <p className="eyebrow">BRAK KLIENTÓW</p>
+            <h1>Dodaj pierwszą osobę</h1>
+            <p>Utwórz konto, zapisz kontakt i przydziel odpowiednie formularze.</p>
+            <button className="button button-primary" onClick={() => setCreating(true)}><Plus size={18} /> Dodaj klienta</button>
+          </main>
         )}
       </div>
     </div>

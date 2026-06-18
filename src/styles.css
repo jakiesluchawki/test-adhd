@@ -84,7 +84,8 @@ body {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
@@ -95,13 +96,15 @@ button {
 button,
 label,
 input,
-textarea {
+textarea,
+select {
   -webkit-tap-highlight-color: transparent;
 }
 
 button:focus-visible,
 input:focus-visible,
-textarea:focus-visible {
+textarea:focus-visible,
+select:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
@@ -230,6 +233,16 @@ h1,
   color: var(--cobalt-dark);
 }
 
+.button-danger {
+  border-color: var(--error);
+  background: var(--error);
+  color: var(--paper);
+}
+
+.button-danger:not(:disabled):hover {
+  background: oklch(0.49 0.18 24);
+}
+
 .button-wide {
   width: 100%;
 }
@@ -333,6 +346,11 @@ h1,
 
 .login-form input,
 .create-form-panel input,
+.create-form-panel select,
+.create-form-panel textarea,
+.client-management input,
+.client-management select,
+.client-management textarea,
 .long-answer textarea {
   width: 100%;
   border: 1px solid var(--rule-strong);
@@ -342,15 +360,35 @@ h1,
 }
 
 .login-form input,
-.create-form-panel input {
+.create-form-panel input,
+.create-form-panel select,
+.client-management input,
+.client-management select {
   min-height: 50px;
   padding: 0 14px;
+}
+
+.create-form-panel textarea,
+.client-management textarea {
+  resize: vertical;
+  padding: 12px 14px;
+  line-height: 1.5;
 }
 
 .login-form input:hover,
 .login-form input:focus,
 .create-form-panel input:hover,
 .create-form-panel input:focus,
+.create-form-panel select:hover,
+.create-form-panel select:focus,
+.create-form-panel textarea:hover,
+.create-form-panel textarea:focus,
+.client-management input:hover,
+.client-management input:focus,
+.client-management select:hover,
+.client-management select:focus,
+.client-management textarea:hover,
+.client-management textarea:focus,
 .long-answer textarea:hover,
 .long-answer textarea:focus {
   border-color: var(--cobalt);
@@ -361,6 +399,19 @@ h1,
   color: var(--error);
   font-size: 14px;
   font-weight: 600;
+}
+
+.form-success {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  border: 1px solid oklch(0.76 0.07 155);
+  border-radius: 6px;
+  padding: 12px 14px;
+  background: var(--success-soft);
+  color: oklch(0.4 0.09 155);
+  font-weight: 700;
 }
 
 .demo-logins {
@@ -1227,6 +1278,41 @@ h1,
   font-size: 18px;
 }
 
+.client-search {
+  display: grid;
+  gap: 7px;
+  border-bottom: 1px solid var(--rule);
+  padding: 14px 20px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.client-search-control {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0 10px;
+  background: var(--canvas);
+}
+
+.client-search-control:focus-within {
+  border-color: var(--cobalt);
+}
+
+.client-search input {
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+}
+
 .client-index-list {
   padding: 8px;
 }
@@ -1281,6 +1367,15 @@ h1,
   font-size: 9px;
 }
 
+.client-index-empty {
+  display: grid;
+  gap: 5px;
+  padding: 24px 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .report-view {
   min-width: 0;
   background: var(--canvas);
@@ -1328,6 +1423,12 @@ h1,
 
 .print-button {
   flex: 0 0 auto;
+}
+
+.report-toolbar-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
 }
 
 .report-paper {
@@ -1387,6 +1488,11 @@ h1,
   margin: 0;
   font-size: 14px;
   font-weight: 600;
+}
+
+.report-hero-copy dd a {
+  color: var(--cobalt-dark);
+  overflow-wrap: anywhere;
 }
 
 .report-summary > img {
@@ -1618,11 +1724,26 @@ h1,
   text-underline-offset: 3px;
 }
 
-.gender-fieldset > p {
+.gender-fieldset > p,
+.contact-fieldset > p {
   margin: 0 0 4px;
   color: var(--muted);
   font-size: 14px;
   line-height: 1.45;
+}
+
+.contact-fieldset label,
+.management-fields label {
+  display: grid;
+  gap: 7px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.form-grid-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .gender-options {
@@ -1784,6 +1905,162 @@ h1,
 
 .create-success .button + .button {
   margin-left: 10px;
+}
+
+.client-management {
+  min-width: 0;
+  padding: 46px 48px 72px;
+  background: var(--canvas);
+}
+
+.client-management > form {
+  width: min(960px, 100%);
+  margin: 0 auto;
+}
+
+.management-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 28px;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 30px;
+}
+
+.management-header .back-link {
+  margin-bottom: 24px;
+}
+
+.management-header h1,
+.empty-clients h1 {
+  margin-bottom: 10px;
+  font-size: 56px;
+  letter-spacing: -0.04em;
+}
+
+.management-header p:not(.eyebrow) {
+  max-width: 60ch;
+  margin: 0;
+  color: var(--muted);
+}
+
+.management-error,
+.client-management > form > .form-success {
+  margin-top: 18px;
+}
+
+.management-section {
+  padding: 34px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.management-section-heading {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.management-section-heading > span {
+  color: var(--cobalt);
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 24px;
+}
+
+.management-section-heading h2 {
+  margin-bottom: 5px;
+  font-size: 24px;
+}
+
+.management-section-heading p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.management-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  padding-left: 58px;
+}
+
+.management-field-wide {
+  grid-column: 1 / -1;
+}
+
+.management-assignment {
+  display: grid;
+  gap: 10px;
+  padding-left: 58px;
+}
+
+.management-credentials {
+  margin: 0 0 20px 58px;
+}
+
+.management-access-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-left: 58px;
+}
+
+.danger-section {
+  border-bottom-color: oklch(0.78 0.07 24);
+}
+
+.danger-section .button-danger {
+  margin-left: 58px;
+}
+
+.delete-confirmation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-left: 58px;
+  border: 1px solid oklch(0.72 0.11 28);
+  border-radius: 6px;
+  padding: 16px;
+  background: oklch(0.95 0.035 28);
+  color: oklch(0.37 0.1 25);
+}
+
+.delete-confirmation p {
+  margin: 4px 0 0;
+}
+
+.delete-confirmation > div:last-child {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.management-save-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 28px;
+}
+
+.empty-clients {
+  display: grid;
+  min-height: calc(100vh - 110px);
+  align-content: center;
+  justify-items: start;
+  padding: 48px;
+}
+
+.empty-clients > svg {
+  margin-bottom: 20px;
+  color: var(--cobalt);
+}
+
+.empty-clients > p:not(.eyebrow) {
+  max-width: 52ch;
+  margin-bottom: 24px;
+  color: var(--muted);
+  line-height: 1.55;
 }
 
 @media (max-width: 1100px) {
@@ -2072,6 +2349,10 @@ h1,
     width: 100%;
   }
 
+  .report-toolbar-actions {
+    width: 100%;
+  }
+
   .print-button {
     display: none;
   }
@@ -2150,6 +2431,45 @@ h1,
   .create-success {
     width: min(100% - 32px, 620px);
   }
+
+  .client-management {
+    padding: 34px 22px 60px;
+  }
+
+  .management-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .management-header h1,
+  .empty-clients h1 {
+    font-size: 44px;
+  }
+
+  .management-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .management-field-wide {
+    grid-column: auto;
+  }
+
+  .management-fields,
+  .management-assignment,
+  .management-access-actions {
+    padding-left: 0;
+  }
+
+  .management-credentials,
+  .danger-section .button-danger,
+  .delete-confirmation {
+    margin-left: 0;
+  }
+
+  .empty-clients {
+    min-height: 520px;
+    padding: 36px 22px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -2189,6 +2509,10 @@ h1,
     grid-template-columns: 1fr;
   }
 
+  .form-grid-two {
+    grid-template-columns: 1fr;
+  }
+
   .gender-option {
     min-height: 60px;
   }
@@ -2213,6 +2537,28 @@ h1,
 
   .create-success .button + .button {
     margin: 10px 0 0;
+  }
+
+  .assignment-controls,
+  .delete-confirmation {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .management-section-heading {
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .management-access-actions .button,
+  .delete-confirmation > div:last-child,
+  .delete-confirmation .button,
+  .management-save-footer .button {
+    width: 100%;
+  }
+
+  .delete-confirmation > div:last-child {
+    flex-direction: column;
   }
 }
 

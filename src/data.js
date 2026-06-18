@@ -1,3 +1,5 @@
+import { BDI_QUESTIONS, SCID_QUESTIONS } from "./assessmentData.js";
+
 export const GENDER_OPTIONS = [
   { value: "female", label: "Kobieta", description: "żeńska forma pytań" },
   { value: "male", label: "Mężczyzna", description: "męska forma pytań" },
@@ -245,6 +247,9 @@ export function createInitialWorkspace() {
         login: "anna.demo",
         password: "spokojny-start",
         email: "anna@example.test",
+        phone: "+48 501 234 567",
+        contactPreference: "email",
+        notes: "Preferuje kontakt pisemny.",
         assignedAt: "18.06.2026",
         deadline: "25.06.2026",
         assignedTests: TESTS.filter((test) => !test.supplemental).map((test) => test.id),
@@ -259,6 +264,9 @@ export function createInitialWorkspace() {
         login: "marek.demo",
         password: "jasny-plan",
         email: "marek@example.test",
+        phone: "+48 502 345 678",
+        contactPreference: "phone",
+        notes: "",
         assignedAt: "16.06.2026",
         deadline: "23.06.2026",
         assignedTests: TESTS.filter((test) => !test.supplemental).map((test) => test.id),
@@ -351,4 +359,3 @@ export function getScore(test, answers = {}) {
     interpretation: "Wynik roboczy do omówienia podczas konsultacji",
   };
 }
-import { BDI_QUESTIONS, SCID_QUESTIONS } from "./assessmentData.js";

@@ -10,7 +10,7 @@ Klienci poradni psychologicznej, którzy wypełniają zestaw testów przed konsu
 
 ## Product Purpose
 
-Produkt prowadzi klienta przez jasno wyjaśniony proces testowy, zapisuje postęp i po ukończeniu tworzy czytelny raport dla psychologa. Sukces oznacza, że klient rozumie po co odpowiada, nie gubi się w formularzu i może wrócić do przerwanego testu, a psycholog szybko widzi status, wynik i pełny kontekst odpowiedzi.
+Produkt prowadzi klienta przez jasno wyjaśniony proces testowy, zapisuje postęp i po ukończeniu tworzy czytelny raport dla psychologa. Psycholog zarządza kartoteką, kontaktem, dostępem i zakresem materiałów bez prowadzenia drugiego rejestru. Sukces oznacza, że klient rozumie po co odpowiada, nie gubi się w formularzu i może wrócić do przerwanego testu, a psycholog szybko widzi status, wynik, pełny kontekst odpowiedzi oraz aktualne dane organizacyjne.
 
 ## Brand Personality
 

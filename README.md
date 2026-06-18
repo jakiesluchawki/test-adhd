@@ -3,7 +3,7 @@
 Interaktywny prototyp panelu do przeprowadzania testów przed konsultacją psychologiczną. Zawiera dwa kompletne przepływy:
 
 - klient: logowanie, wprowadzenie, zapis postępu, pytania zamknięte i opisowe, skróty numeryczne, Enter przechodzący dalej oraz przegląd odpowiedzi;
-- psycholog: lista klientów, statusy, tworzenie kont demo z wyborem formy językowej pytań, czytelne dane dostępowe z gotową wiadomością do skopiowania oraz skonsolidowany raport z drukiem do PDF.
+- psycholog: wyszukiwanie i kartoteka klientów, dane kontaktowe, edycja przydziału, bezpieczne usuwanie kont, zarządzanie hasłem, statusy, czytelne dane dostępowe z gotową wiadomością do skopiowania oraz skonsolidowany raport z drukiem do PDF.
 
 ## Demo
 
@@ -57,4 +57,6 @@ Panel zachowuje kolejność materiałów z wiadomości organizacyjnej:
 
 Wszystkie formularze z wiadomości można przydzielać pojedynczo lub jako pełny zestaw. BDI-II działa jako 21 grup odpowiedzi z wynikiem i komunikatem bezpieczeństwa, a SCID zawiera 106 pytań TAK/NIE oraz obowiązkowe uzasadnienie każdej odpowiedzi TAK.
 
-Wersja demonstracyjna nie zbiera adresu e-mail. Po utworzeniu konta pokazuje adres panelu, login, hasło i gotową wiadomość, którą psycholog może ręcznie przekazać klientowi wybranym kanałem.
+Wersja demonstracyjna zapisuje dane kontaktowe wyłącznie lokalnie, bez automatycznej wysyłki. Po utworzeniu konta pokazuje adres panelu, login, hasło i gotową wiadomość, którą psycholog może ręcznie przekazać klientowi wybranym kanałem.
+
+Szczegółowy przegląd braków i wdrożonych funkcji administracyjnych znajduje się w `management-audit.md`.
