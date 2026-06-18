@@ -5,7 +5,7 @@ export const TESTS = [
     title: "Kwestionariusz startowy ADHD",
     eyebrow: "Materiał wstępny",
     duration: "około 5 minut",
-    image: "./assets/section-01.png",
+    image: "./assets/section-01.webp",
     intro:
       "Pytania dotyczą codziennego funkcjonowania w ostatnich sześciu miesiącach. Pomagają uporządkować obszary, o których warto porozmawiać podczas konsultacji.",
     context:
@@ -32,7 +32,7 @@ export const TESTS = [
     title: "GAD-7",
     eyebrow: "Kwestionariusz przesiewowy",
     duration: "około 3 minuty",
-    image: "./assets/section-02.png",
+    image: "./assets/section-02.webp",
     intro:
       "Oceń, jak często w ciągu ostatnich dwóch tygodni dokuczały Ci opisane objawy.",
     context:
@@ -59,7 +59,7 @@ export const TESTS = [
     title: "Wywiad rozwojowy",
     eyebrow: "Odpowiedzi opisowe",
     duration: "około 15 minut",
-    image: "./assets/section-04.png",
+    image: "./assets/section-04.webp",
     intro:
       "Ta część zbiera informacje o dzieciństwie, edukacji, relacjach i sposobach radzenia sobie. Możesz pisać własnymi słowami.",
     context:

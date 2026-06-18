@@ -179,7 +179,7 @@ function LoginScreen({ workspace, onLogin, onReset }) {
       </section>
       <figure className="login-art">
         <img
-          src="./assets/adhd-hero.png"
+          src="./assets/adhd-hero.webp"
           alt="Abstrakcyjna postać z geometryczną konstrukcją symbolizującą proces myślenia"
         />
         <figcaption>Odpowiedzi nabierają sensu dopiero w rozmowie.</figcaption>
@@ -246,7 +246,7 @@ function WelcomeScreen({ client, onAccept, onLogout }) {
           </button>
         </section>
         <figure className="welcome-art">
-          <img src="./assets/adhd-summary.png" alt="Abstrakcyjna postać porządkująca elementy" />
+          <img src="./assets/adhd-summary.webp" alt="Abstrakcyjna postać porządkująca elementy" />
         </figure>
       </main>
     </div>
@@ -684,7 +684,7 @@ function ReportSummary({ client }) {
           <div><dt>Status</dt><dd>{overall.completed ? "Ukończono" : `W trakcie, ${overall.percent}%`}</dd></div>
         </dl>
       </div>
-      <img src="./assets/adhd-summary.png" alt="Abstrakcyjna postać porządkująca informacje" />
+      <img src="./assets/adhd-summary.webp" alt="Abstrakcyjna postać porządkująca informacje" />
       <aside className="report-disclaimer">
         <p className="eyebrow">WAŻNE</p>
         <strong>
@@ -813,7 +813,7 @@ function CreateClient({ onCreate, onCancel }) {
           <button className="button button-primary" type="submit"><Plus size={18} /> Utwórz konto demo</button>
         </form>
       </section>
-      <img src="./assets/section-05.png" alt="Abstrakcyjna kompozycja symbolizująca rozpoczęcie procesu" />
+      <img src="./assets/section-05.webp" alt="Abstrakcyjna kompozycja symbolizująca rozpoczęcie procesu" />
     </main>
   );
 }

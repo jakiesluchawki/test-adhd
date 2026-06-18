@@ -1582,7 +1582,7 @@ h1,
   .login-page {
     display: block;
     min-height: 100svh;
-    background-image: linear-gradient(oklch(0.985 0.008 76 / 0.82), oklch(0.985 0.008 76 / 0.82)), url("/test-adhd/assets/adhd-hero.png");
+    background-image: linear-gradient(oklch(0.985 0.008 76 / 0.82), oklch(0.985 0.008 76 / 0.82)), url("/test-adhd/assets/adhd-hero.webp");
     background-position: center;
     background-size: cover;
   }
