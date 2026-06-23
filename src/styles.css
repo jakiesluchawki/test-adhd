@@ -38,30 +38,38 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Comfortaa";
+  src: url("/test-adhd/assets/comfortaa-latin-ext.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  color: oklch(0.245 0.045 252);
-  background: oklch(0.965 0.012 73);
-  font-family: "DM Sans", system-ui, sans-serif;
+  color: #5c695f;
+  background: #f4f1ed;
+  font-family: "Comfortaa", "DM Sans", system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --canvas: oklch(0.965 0.012 73);
-  --paper: oklch(0.985 0.008 76);
-  --ink: oklch(0.245 0.045 252);
-  --muted: oklch(0.49 0.025 250);
-  --rule: oklch(0.84 0.014 78);
-  --rule-strong: oklch(0.65 0.02 250);
-  --cobalt: oklch(0.49 0.13 252);
-  --cobalt-dark: oklch(0.39 0.13 252);
-  --cobalt-soft: oklch(0.93 0.035 252);
-  --coral: oklch(0.68 0.13 34);
-  --coral-soft: oklch(0.94 0.035 35);
-  --success: oklch(0.58 0.09 155);
-  --success-soft: oklch(0.94 0.025 155);
-  --warning: oklch(0.72 0.12 82);
-  --warning-soft: oklch(0.95 0.035 82);
-  --error: oklch(0.57 0.18 24);
-  --focus: oklch(0.78 0.13 82);
-  --shadow: 0 18px 50px oklch(0.25 0.03 252 / 0.09);
+  --canvas: #f4f1ed;
+  --paper: #fffdf9;
+  --ink: #5c695f;
+  --muted: #777d78;
+  --rule: #dfdcd5;
+  --rule-strong: #abb0aa;
+  --cobalt: #657a70;
+  --cobalt-dark: #4f6258;
+  --cobalt-soft: #e6ede8;
+  --coral: #c69582;
+  --coral-soft: #f3e5df;
+  --success: #668d78;
+  --success-soft: #e5efe8;
+  --warning: #b98767;
+  --warning-soft: #f5e8df;
+  --error: #a85f58;
+  --focus: #c69582;
+  --shadow: 0 16px 44px rgb(79 98 88 / 0.08);
 }
 
 * {
@@ -135,7 +143,7 @@ h3 {
 h1,
 .report-score strong,
 .report-results article > strong {
-  font-family: "Fraunces", Georgia, serif;
+  font-family: "Comfortaa", "DM Sans", system-ui, sans-serif;
   font-weight: 500;
 }
 
@@ -166,9 +174,11 @@ h1,
   flex: 0 0 auto;
   place-items: center;
   border-radius: 50%;
-  background: var(--cobalt);
+  border: 1px solid color-mix(in srgb, var(--coral), white 25%);
+  background: var(--coral-soft);
   color: var(--paper);
-  font-family: "Fraunces", Georgia, serif;
+  color: var(--cobalt-dark);
+  font-family: "Comfortaa", "DM Sans", system-ui, sans-serif;
   font-size: 22px;
 }
 
@@ -201,7 +211,7 @@ h1,
   justify-content: center;
   gap: 10px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: 999px;
   padding: 0 20px;
   cursor: pointer;
   font-weight: 700;
@@ -254,7 +264,7 @@ h1,
   flex: 0 0 auto;
   place-items: center;
   border: 1px solid var(--rule);
-  border-radius: 6px;
+  border-radius: 999px;
   background: transparent;
   cursor: pointer;
 }
@@ -483,7 +493,8 @@ h1,
   gap: 28px;
   border-bottom: 1px solid var(--rule);
   padding: 0 32px;
-  background: var(--canvas);
+  background: rgb(255 253 249 / 0.94);
+  backdrop-filter: blur(14px);
 }
 
 .header-context {
@@ -512,10 +523,10 @@ h1,
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-bottom: 1px solid oklch(0.86 0.055 82);
+  border-bottom: 1px solid #e7d7ce;
   padding: 8px 20px;
   background: var(--warning-soft);
-  color: oklch(0.36 0.07 68);
+  color: #765f54;
   font-size: 12px;
   font-weight: 600;
   text-align: center;
@@ -2571,6 +2582,131 @@ h1,
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+/* Visual alignment with the W RÓWNOWADZE practice: warm, quiet and legible. */
+.welcome-points article > span,
+.overall-progress > strong,
+.section-heading-row h2,
+.assignment-number,
+.question-context h2,
+.question-number,
+.review-count,
+.review-row > span:first-child,
+.report-disclaimer strong,
+.report-answers article > span,
+.management-section-heading > span {
+  font-family: "Comfortaa", "DM Sans", system-ui, sans-serif;
+}
+
+.login-content h1,
+.welcome-copy h1,
+.client-hero h1,
+.test-intro h1,
+.review-heading h1,
+.create-form-panel h1,
+.create-success h1,
+.management-header h1,
+.empty-clients h1,
+.report-section-heading h1,
+.report-hero-copy h1 {
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+}
+
+.login-content h1 {
+  max-width: 560px;
+  font-size: clamp(48px, 5.5vw, 72px);
+}
+
+.brand-copy strong {
+  color: var(--ink);
+  letter-spacing: 0.17em;
+}
+
+.login-form input,
+.create-form-panel input,
+.create-form-panel select,
+.create-form-panel textarea,
+.client-management input,
+.client-management select,
+.client-management textarea,
+.long-answer textarea,
+.form-success,
+.client-search-control,
+.client-index-row,
+.create-form-panel fieldset,
+.gender-option,
+.answer-option,
+.context-panel,
+.safety-alert,
+.delete-confirmation {
+  border-radius: 14px;
+}
+
+.assignment-row,
+.overall-progress,
+.privacy-note,
+.test-facts,
+.review-row,
+.credentials-box,
+.invitation-preview,
+.management-section,
+.empty-clients {
+  border-radius: 18px;
+}
+
+.report-paper {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--rule), white 30%);
+  border-radius: 24px;
+}
+
+.report-toolbar {
+  background: rgb(244 241 237 / 0.94);
+  backdrop-filter: blur(14px);
+}
+
+.client-index-row.active {
+  border-color: #c8d4cd;
+}
+
+.demo-account-note,
+.source-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.source-link {
+  margin-top: 10px;
+  color: var(--cobalt-dark);
+  text-decoration: none;
+}
+
+.source-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.eyebrow {
+  color: var(--coral);
+  letter-spacing: 0.17em;
+}
+
+.button-primary,
+.icon-button-primary {
+  box-shadow: 0 8px 20px rgb(79 98 88 / 0.12);
+}
+
+.login-art img,
+.welcome-art img,
+.create-client-page > img,
+.report-art {
+  filter: saturate(0.86) contrast(0.98);
 }
 
 @media print {

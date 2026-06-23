@@ -6,7 +6,7 @@ product
 
 ## Users
 
-Klienci poradni psychologicznej, którzy wypełniają zestaw testów przed konsultacją, oraz psycholog prowadzący, który przydziela materiały, śledzi postęp i czyta skonsolidowany raport. Użytkownicy różnią się doświadczeniem cyfrowym, poziomem stresu, koncentracją i potrzebami dostępności.
+Klienci poradni psychologicznej, którzy wypełniają zestaw testów przed konsultacją, oraz zespół terapeutów. Każdy terapeuta pracuje we własnej przestrzeni klientów, przydziela materiały, śledzi postęp i czyta skonsolidowany raport. Użytkownicy różnią się doświadczeniem cyfrowym, poziomem stresu, koncentracją i potrzebami dostępności.
 
 ## Product Purpose
 

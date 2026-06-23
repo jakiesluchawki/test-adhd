@@ -36,7 +36,7 @@ export function isAnswerComplete(test, answer) {
 export const TESTS = [
   {
     id: "adhd-start",
-    order: 6,
+    order: 99,
     supplemental: true,
     short: "ADHD start",
     title: "Kwestionariusz startowy ADHD",
@@ -215,6 +215,165 @@ export const TESTS = [
       "Czy istnieją nagrania lub inne materiały z tego okresu? Napisz, co można przekazać psychologowi.",
     ],
   },
+  {
+    id: "ypi1",
+    order: 6,
+    mailStep: "06",
+    short: "YPI-1",
+    title: "Inwentarz Osobowości Younga (YPI-1)",
+    eyebrow: "Narzędzie licencjonowane",
+    duration: "72 pozycje",
+    image: "./assets/section-05.webp",
+    available: false,
+    licensed: true,
+    sourceLabel: "Young / Schema Therapy",
+    intro: "Kwestionariusz stylów i wzorców osobowości wykorzystany w materiale Wiktorii.",
+    context: "Treść pozycji wymaga potwierdzenia uprawnień oraz wdrożenia w prywatnej wersji gabinetu.",
+    questions: [],
+  },
+  {
+    id: "ysq-s3",
+    order: 7,
+    mailStep: "07",
+    short: "YSQ-S3",
+    title: "Kwestionariusz Schematów Younga (YSQ-S3)",
+    eyebrow: "Narzędzie licencjonowane",
+    duration: "90 pozycji",
+    image: "./assets/section-04.webp",
+    available: false,
+    licensed: true,
+    sourceLabel: "Young / Schema Therapy",
+    intro: "Kwestionariusz wczesnych nieadaptacyjnych schematów wykorzystany w materiale Wiktorii.",
+    context: "Treść pozycji wymaga potwierdzenia uprawnień oraz wdrożenia w prywatnej wersji gabinetu.",
+    questions: [],
+  },
+  {
+    id: "smi-1-1",
+    order: 8,
+    mailStep: "08",
+    short: "SMI 1.1",
+    title: "Inwentarz Trybów Schematów (SMI 1.1)",
+    eyebrow: "Narzędzie licencjonowane",
+    duration: "124 pozycje",
+    image: "./assets/section-03.webp",
+    available: false,
+    licensed: true,
+    sourceLabel: "Schema Therapy",
+    intro: "Kwestionariusz trybów schematów wykorzystany w materiale Wiktorii.",
+    context: "Treść pozycji wymaga potwierdzenia uprawnień oraz wdrożenia w prywatnej wersji gabinetu.",
+    questions: [],
+  },
+  {
+    id: "who5",
+    order: 9,
+    mailStep: "09",
+    short: "WHO-5",
+    title: "Wskaźnik Dobrego Samopoczucia WHO-5",
+    eyebrow: "Dobrostan psychiczny",
+    duration: "około 2 minuty",
+    image: "./assets/section-01.webp",
+    sourceLabel: "World Health Organization, polska wersja 2024",
+    sourceUrl: "https://www.who.int/publications/m/item/WHO-UCN-MSD-MHE-2024.01",
+    licenseLabel: "CC BY-NC-SA 3.0",
+    intro: "Wybierz odpowiedź, która najlepiej opisuje Twoje samopoczucie w ciągu ostatnich dwóch tygodni.",
+    context: "WHO-5 mierzy dobrostan, a nie stawia diagnozy. Wyższy wynik oznacza lepsze samopoczucie; interpretację należy omówić ze specjalistą.",
+    scale: [
+      { value: 0, label: "Nigdy" },
+      { value: 1, label: "Od czasu do czasu" },
+      { value: 2, label: "Mniej niż połowę czasu" },
+      { value: 3, label: "Więcej niż połowę czasu" },
+      { value: 4, label: "Prawie cały czas" },
+      { value: 5, label: "Cały czas" },
+    ],
+    questions: [
+      {
+        female: "Czułam się wesoła i w dobrym nastroju.",
+        male: "Czułem się wesoły i w dobrym nastroju.",
+        neutral: "Czułam się wesoła/Czułem się wesoły i w dobrym nastroju.",
+      },
+      {
+        female: "Czułam się spokojna i odprężona.",
+        male: "Czułem się spokojny i odprężony.",
+        neutral: "Czułam się spokojna i odprężona/Czułem się spokojny i odprężony.",
+      },
+      {
+        female: "Czułam się aktywna i energiczna.",
+        male: "Czułem się aktywny i energiczny.",
+        neutral: "Czułam się aktywna i energiczna/Czułem się aktywny i energiczny.",
+      },
+      {
+        female: "Budziłam się z uczuciem świeżości i wypoczęta.",
+        male: "Budziłem się z uczuciem świeżości i wypoczęty.",
+        neutral: "Budziłam się z uczuciem świeżości i wypoczęta/Budziłem się z uczuciem świeżości i wypoczęty.",
+      },
+      "Moje życie codzienne było wypełnione interesującymi mnie sprawami.",
+    ],
+  },
+  {
+    id: "phq9",
+    order: 10,
+    mailStep: "10",
+    short: "PHQ-9",
+    title: "Kwestionariusz Zdrowia Pacjenta PHQ-9",
+    eyebrow: "Katalog narzędzi",
+    duration: "9 pozycji",
+    image: "./assets/section-02.webp",
+    available: false,
+    sourceLabel: "Pfizer / PHQ Screeners",
+    sourceUrl: "https://www.pfizer.com/contact/faqs",
+    intro: "Krótkie narzędzie do przesiewowej oceny objawów depresyjnych i monitorowania zmiany.",
+    context: "Przed aktywacją należy podłączyć zatwierdzoną polską wersję i procedurę bezpieczeństwa dla odpowiedzi dotyczących samouszkodzeń.",
+    questions: [],
+  },
+  {
+    id: "audit",
+    order: 11,
+    mailStep: "11",
+    short: "AUDIT",
+    title: "Alcohol Use Disorders Identification Test (AUDIT)",
+    eyebrow: "Katalog narzędzi WHO",
+    duration: "10 pozycji",
+    image: "./assets/section-05.webp",
+    available: false,
+    sourceLabel: "World Health Organization",
+    sourceUrl: "https://www.who.int/publications/i/item/audit-the-alcohol-use-disorders-identification-test-guidelines-for-use-in-primary-health-care",
+    intro: "Narzędzie przesiewowe WHO dotyczące ryzykownego i szkodliwego używania alkoholu.",
+    context: "Przed aktywacją potrzebna jest zweryfikowana polska wersja oraz gabinetowa procedura dalszego postępowania.",
+    questions: [],
+  },
+  {
+    id: "asrs-v1-1",
+    order: 12,
+    mailStep: "12",
+    short: "ASRS-v1.1",
+    title: "ASRS-v1.1 — wersja przesiewowa 6Q",
+    eyebrow: "Katalog narzędzi ADHD",
+    duration: "6 pozycji",
+    image: "./assets/adhd-summary.webp",
+    available: false,
+    licensed: true,
+    sourceLabel: "NYU / Harvard National Comorbidity Survey",
+    sourceUrl: "https://www.hcp.med.harvard.edu/ncs/asrs.php",
+    intro: "Sześciopytaniowe narzędzie przesiewowe objawów ADHD u osób dorosłych.",
+    context: "Źródło zezwala na użycie wersji 6Q bez formalnej zgody pod warunkiem zachowania treści i algorytmu. Aktywacja czeka na zatwierdzoną polską wersję.",
+    questions: [],
+  },
+  {
+    id: "pcl5",
+    order: 13,
+    mailStep: "13",
+    short: "PCL-5",
+    title: "PTSD Checklist for DSM-5 (PCL-5)",
+    eyebrow: "Katalog narzędzi PTSD",
+    duration: "20 pozycji",
+    image: "./assets/section-04.webp",
+    available: false,
+    sourceLabel: "U.S. Department of Veterans Affairs",
+    sourceUrl: "https://www.ptsd.va.gov/professional/assessment/adult-sr/ptsd-checklist.asp",
+    intro: "Public-domainowe narzędzie do oceny nasilenia objawów PTSD i monitorowania zmiany.",
+    context: "Interpretacja należy do wykwalifikowanego specjalisty. Aktywacja czeka na zweryfikowaną polską wersję i procedurę kliniczną.",
+    questions: [],
+  },
 ].sort((first, second) => first.order - second.order);
 
 const completedAnswers = {
@@ -242,6 +401,7 @@ export function createInitialWorkspace() {
     clients: [
       {
         id: "anna-demo",
+        ownerId: "therapist-emilia",
         name: "Anna Kowalska",
         gender: "female",
         login: "anna.demo",
@@ -259,6 +419,7 @@ export function createInitialWorkspace() {
       },
       {
         id: "marek-demo",
+        ownerId: "therapist-emilia",
         name: "Marek Wiśniewski",
         gender: "male",
         login: "marek.demo",
@@ -274,25 +435,90 @@ export function createInitialWorkspace() {
         answers: completedAnswers,
         completedTests: TESTS.filter((test) => test.available !== false).map((test) => test.id),
       },
+      {
+        id: "julia-demo-client",
+        ownerId: "therapist-julia",
+        name: "Joanna Zielińska",
+        gender: "female",
+        login: "joanna.demo",
+        password: "spokojny-ogrod",
+        email: "joanna@example.test",
+        phone: "+48 503 456 789",
+        contactPreference: "text",
+        notes: "Konto demonstracyjne przypisane do Julii.",
+        assignedAt: "20.06.2026",
+        deadline: "do ustalenia",
+        assignedTests: ["who5", "gad7", "phq9"],
+        introAccepted: false,
+        answers: Object.fromEntries(TESTS.map((test) => [test.id, {}])),
+        completedTests: [],
+      },
+      {
+        id: "aleksandra-demo-client",
+        ownerId: "therapist-aleksandra",
+        name: "Piotr Lewandowski",
+        gender: "male",
+        login: "piotr.demo",
+        password: "cieply-poranek",
+        email: "piotr@example.test",
+        phone: "+48 504 567 890",
+        contactPreference: "email",
+        notes: "Konto demonstracyjne przypisane do Aleksandry.",
+        assignedAt: "21.06.2026",
+        deadline: "30.06.2026",
+        assignedTests: ["who5", "pcl5", "interview"],
+        introAccepted: false,
+        answers: Object.fromEntries(TESTS.map((test) => [test.id, {}])),
+        completedTests: [],
+      },
     ],
   };
 }
 
-export const PSYCHOLOGIST = {
-  id: "psych-demo",
-  name: "Emilia Juszczyk",
-  login: "emilia.demo",
-  password: "panel-demo",
-  practice: "Pracownia Psychoterapii W RÓWNOWADZE",
-};
+export const THERAPISTS = [
+  {
+    id: "therapist-emilia",
+    name: "Emilia Juszczyk",
+    login: "emilia.juszczyk",
+    credentialHash: "9d1141fc92125c84e5fd36dc389bdebf5acf4bd25f047bf9716cc3f970c5fbad",
+    practice: "Pracownia Psychoterapii W RÓWNOWADZE",
+  },
+  {
+    id: "therapist-julia",
+    name: "Julia Gontarek",
+    login: "julia.gontarek",
+    credentialHash: "2eb49413a3e55c62bcfb6b1d3364be820bb774c7feccd5761690d163a831715b",
+    practice: "Pracownia Psychoterapii W RÓWNOWADZE",
+  },
+  {
+    id: "therapist-aleksandra",
+    name: "Aleksandra Jasińska",
+    login: "aleksandra.jasinska",
+    credentialHash: "9a5a21506b1b5276b21c4b0dfbfb3ea508869dcc51ad2c23cb631cdf6f4c9b73",
+    practice: "Pracownia Psychoterapii W RÓWNOWADZE",
+  },
+];
+
+export const PSYCHOLOGIST = THERAPISTS[0];
 
 export function getTestProgress(client, test) {
+  if (test.available === false) {
+    return {
+      answerCount: 0,
+      total: 0,
+      percent: 0,
+      completed: false,
+      unavailable: true,
+    };
+  }
   const answers = client.answers?.[test.id] || {};
   const answerCount = test.questions.filter((_, index) => isAnswerComplete(test, answers[index])).length;
   return {
     answerCount,
     total: test.questions.length,
-    percent: Math.round((answerCount / test.questions.length) * 100),
+    percent: test.questions.length
+      ? Math.round((answerCount / test.questions.length) * 100)
+      : 0,
     completed: client.completedTests.includes(test.id),
   };
 }
@@ -304,7 +530,7 @@ export function getAssignedTests(client) {
 }
 
 export function getClientProgress(client) {
-  const assignedTests = getAssignedTests(client);
+  const assignedTests = getAssignedTests(client).filter((test) => test.available !== false);
   const answered = assignedTests.reduce(
     (sum, test) => sum + getTestProgress(client, test).answerCount,
     0,
@@ -351,6 +577,15 @@ export function getScore(test, answers = {}) {
       max,
       interpretation,
       alert: Number(answers[test.safetyQuestion]) > 0,
+    };
+  }
+  if (test.id === "who5") {
+    return {
+      value,
+      max,
+      interpretation: value < 13
+        ? "Obniżony dobrostan — wynik do pogłębienia podczas konsultacji"
+        : "Dobrostan powyżej progu przesiewowego WHO-5",
     };
   }
   return {

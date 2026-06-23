@@ -29,6 +29,7 @@ import {
 import {
   GENDER_OPTIONS,
   PSYCHOLOGIST,
+  THERAPISTS,
   TESTS,
   createInitialWorkspace,
   getAssignedTests,
@@ -42,7 +43,8 @@ import {
   isAnswerComplete,
 } from "./data.js";
 
-const STORAGE_KEY = "wrownowadze-testy-demo-v1";
+const STORAGE_KEY = "wrownowadze-testy-demo-v2";
+const LEGACY_STORAGE_KEY = "wrownowadze-testy-demo-v1";
 const PANEL_URL = "https://jakiesluchawki.github.io/test-adhd/";
 const CONTACT_OPTIONS = [
   { value: "none", label: "Bez preferencji" },
@@ -53,6 +55,14 @@ const CONTACT_OPTIONS = [
 
 function generatePassword() {
   return `spokojny-${Math.floor(1000 + Math.random() * 9000)}`;
+}
+
+async function hashCredentials(login, password) {
+  const bytes = new TextEncoder().encode(`${login}\0${password}`);
+  const digest = await window.crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 function buildInvitation(client) {
@@ -74,33 +84,39 @@ function hasDuplicateContact(clients, currentId, email, phone) {
 
 function loadWorkspace() {
   try {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
+    const stored = window.localStorage.getItem(STORAGE_KEY)
+      || window.localStorage.getItem(LEGACY_STORAGE_KEY);
     if (!stored) return createInitialWorkspace();
     const workspace = JSON.parse(stored);
     const freshWorkspace = createInitialWorkspace();
     const blankAnswers = Object.fromEntries(TESTS.map((test) => [test.id, {}]));
+    const normalizedClients = workspace.clients.map((client) => {
+      const freshDemo = freshWorkspace.clients.find((item) => item.id === client.id);
+      return {
+        ...freshDemo,
+        ...client,
+        ownerId: client.ownerId || freshDemo?.ownerId || PSYCHOLOGIST.id,
+        assignedTests: client.assignedTests || freshDemo?.assignedTests
+          || TESTS.filter((test) => !test.supplemental).map((test) => test.id),
+        answers: { ...blankAnswers, ...freshDemo?.answers, ...client.answers },
+        completedTests: Array.from(new Set([
+          ...(freshDemo?.completedTests || []),
+          ...(client.completedTests || []),
+        ])),
+        gender: client.gender
+          || (client.id === "anna-demo" ? "female" : client.id === "marek-demo" ? "male" : "neutral"),
+        email: client.email ?? freshDemo?.email ?? "",
+        phone: client.phone ?? freshDemo?.phone ?? "",
+        contactPreference: client.contactPreference ?? freshDemo?.contactPreference ?? "none",
+        notes: client.notes ?? freshDemo?.notes ?? "",
+      };
+    });
+    const missingDemoClients = freshWorkspace.clients.filter(
+      (freshClient) => !normalizedClients.some((client) => client.id === freshClient.id),
+    );
     return {
       ...workspace,
-      clients: workspace.clients.map((client) => {
-        const freshDemo = freshWorkspace.clients.find((item) => item.id === client.id);
-        return {
-          ...freshDemo,
-          ...client,
-          assignedTests: client.assignedTests || freshDemo?.assignedTests
-            || TESTS.filter((test) => !test.supplemental).map((test) => test.id),
-          answers: { ...blankAnswers, ...freshDemo?.answers, ...client.answers },
-          completedTests: Array.from(new Set([
-            ...(freshDemo?.completedTests || []),
-            ...(client.completedTests || []),
-          ])),
-          gender: client.gender
-            || (client.id === "anna-demo" ? "female" : client.id === "marek-demo" ? "male" : "neutral"),
-          email: client.email ?? freshDemo?.email ?? "",
-          phone: client.phone ?? freshDemo?.phone ?? "",
-          contactPreference: client.contactPreference ?? freshDemo?.contactPreference ?? "none",
-          notes: client.notes ?? freshDemo?.notes ?? "",
-        };
-      }),
+      clients: [...normalizedClients, ...missingDemoClients],
     };
   } catch {
     return createInitialWorkspace();
@@ -150,7 +166,7 @@ function AppHeader({ session, onLogout, children }) {
       {children}
       <div className="header-user">
         <span className="header-user-name">
-          {session.role === "psychologist" ? PSYCHOLOGIST.name : session.name}
+          {session.name}
         </span>
         <button className="icon-button" onClick={onLogout} aria-label="Wyloguj">
           <LogOut size={18} />
@@ -165,19 +181,14 @@ function LoginScreen({ workspace, onLogin, onReset }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
     setError("");
-    const result = onLogin(login.trim(), password);
+    const result = await onLogin(login.trim(), password);
     if (!result) setError("Nieprawidłowy login lub hasło. Wybierz konto demo poniżej.");
   };
 
-  const useDemo = (role) => {
-    if (role === "psychologist") {
-      setLogin(PSYCHOLOGIST.login);
-      setPassword(PSYCHOLOGIST.password);
-      return;
-    }
+  const useDemo = () => {
     const client = workspace.clients.find((item) => item.id === "anna-demo") || workspace.clients[0];
     if (!client) {
       setError("Brak konta klienta. Zaloguj się jako psycholog i utwórz nowe konto.");
@@ -229,17 +240,11 @@ function LoginScreen({ workspace, onLogin, onReset }) {
           <div className="demo-logins" aria-label="Konta demonstracyjne">
             <p>Wersja demonstracyjna</p>
             <div className="demo-login-actions">
-              <button className="text-button" onClick={() => useDemo("client")}>
+              <button className="text-button" onClick={useDemo}>
                 <UserRound size={16} />
                 Uzupełnij dane klienta
               </button>
-              <button
-                className="text-button"
-                onClick={() => useDemo("psychologist")}
-              >
-                <UsersRound size={16} />
-                Uzupełnij dane psychologa
-              </button>
+              <span className="demo-account-note"><UsersRound size={16} /> 3 osobne konta terapeutów</span>
             </div>
           </div>
         </div>
@@ -367,8 +372,8 @@ function ClientHome({ client, onOpenTest }) {
           <p className="eyebrow">TWÓJ ZESTAW</p>
           <h1>Materiały przed konsultacją</h1>
           <p>
-            Pięć etapów zgodnych z wiadomością Emilii. Zacznij od dostępnej
-            części i wracaj do przerwanych odpowiedzi, kiedy potrzebujesz.
+            Materiały dobrane przez terapeutę. Zacznij od dostępnej części i
+            wracaj do przerwanych odpowiedzi, kiedy potrzebujesz.
           </p>
         </div>
         <div className="overall-progress">
@@ -872,6 +877,11 @@ function TestReport({ client, test }) {
           <div>
             <strong>Formularz czeka na prywatne podłączenie</strong>
             <p>{test.context}</p>
+            {test.sourceUrl && (
+              <a className="source-link" href={test.sourceUrl} target="_blank" rel="noreferrer">
+                <ExternalLink size={15} /> Źródło: {test.sourceLabel}
+              </a>
+            )}
           </div>
         </div>
       </section>
@@ -932,7 +942,7 @@ function ReportSummary({ client }) {
     <section className="report-summary">
       <div className="report-hero-copy">
         <p className="eyebrow">MATERIAŁY DO KONSULTACJI</p>
-        <h1>Diagnoza w kierunku ADHD</h1>
+        <h1>Materiały do konsultacji</h1>
         <p>
           Skonsolidowany zestaw odpowiedzi. Każda część zachowuje wynik,
           pełne brzmienie pytań i kontekst odpowiedzi klienta.
@@ -1187,7 +1197,7 @@ function CreateClient({ clients, onCreate, onCancel }) {
             </div>
           </fieldset>
           <fieldset>
-            <legend>Zakres z wiadomości Emilii</legend>
+            <legend>Katalog formularzy</legend>
             <div className="assignment-controls">
               <span>{selectedTests.length} z {assignableTests.length} formularzy</span>
               <div>
@@ -1206,7 +1216,11 @@ function CreateClient({ clients, onCreate, onCancel }) {
                 />
                 <span>
                   <strong>{test.mailStep} · {test.title}</strong>
-                  <small>{test.duration}</small>
+                  <small>
+                    {test.duration}
+                    {test.available === false ? " · do konfiguracji" : " · gotowy"}
+                    {test.sourceLabel ? ` · ${test.sourceLabel}` : ""}
+                  </small>
                 </span>
               </label>
             ))}
@@ -1379,7 +1393,14 @@ function ClientManagement({ client, clients, onSave, onDelete, onClose }) {
                     ? current.filter((id) => id !== test.id)
                     : [...current, test.id])}
                 />
-                <span><strong>{test.mailStep} · {test.title}</strong><small>{test.duration}</small></span>
+                <span>
+                  <strong>{test.mailStep} · {test.title}</strong>
+                  <small>
+                    {test.duration}
+                    {test.available === false ? " · do konfiguracji" : " · gotowy"}
+                    {test.sourceLabel ? ` · ${test.sourceLabel}` : ""}
+                  </small>
+                </span>
               </label>
             ))}
           </div>
@@ -1428,14 +1449,15 @@ function ClientManagement({ client, clients, onSave, onDelete, onClose }) {
   );
 }
 
-function PsychologistPortal({ workspace, setWorkspace, onLogout }) {
-  const [selectedId, setSelectedId] = useState(workspace.clients[1]?.id || workspace.clients[0]?.id);
+function PsychologistPortal({ workspace, setWorkspace, therapist, onLogout }) {
+  const therapistClients = workspace.clients.filter((client) => client.ownerId === therapist.id);
+  const [selectedId, setSelectedId] = useState(therapistClients[1]?.id || therapistClients[0]?.id);
   const [creating, setCreating] = useState(false);
   const [managing, setManaging] = useState(false);
-  const selected = workspace.clients.find((client) => client.id === selectedId) || workspace.clients[0];
+  const selected = therapistClients.find((client) => client.id === selectedId) || therapistClients[0];
 
   const deleteClient = (clientId) => {
-    const remaining = workspace.clients.filter((client) => client.id !== clientId);
+    const remaining = therapistClients.filter((client) => client.id !== clientId);
     setWorkspace((current) => ({
       ...current,
       clients: current.clients.filter((client) => client.id !== clientId),
@@ -1447,30 +1469,31 @@ function PsychologistPortal({ workspace, setWorkspace, onLogout }) {
 
   return (
     <div className="psych-shell">
-      <AppHeader session={{ role: "psychologist" }} onLogout={onLogout}>
+      <AppHeader session={{ role: "psychologist", name: therapist.name }} onLogout={onLogout}>
         <span className="header-context">Panel psychologa</span>
       </AppHeader>
       <DemoNotice />
       <div className="psych-layout">
         <ClientIndex
-          clients={workspace.clients}
+          clients={therapistClients}
           selectedId={creating ? null : selectedId}
           onCreate={() => { setCreating(true); setManaging(false); }}
           onSelect={(id) => { setSelectedId(id); setCreating(false); setManaging(false); }}
         />
         {creating ? (
           <CreateClient
-            clients={workspace.clients}
+            clients={therapistClients}
             onCancel={() => setCreating(false)}
             onCreate={(client) => {
-              setWorkspace((current) => ({ ...current, clients: [...current.clients, client] }));
+              const ownedClient = { ...client, ownerId: therapist.id };
+              setWorkspace((current) => ({ ...current, clients: [...current.clients, ownedClient] }));
               setSelectedId(client.id);
             }}
           />
         ) : managing && selected ? (
           <ClientManagement
             client={selected}
-            clients={workspace.clients}
+            clients={therapistClients}
             onClose={() => setManaging(false)}
             onSave={(updatedClient) => setWorkspace((current) => ({
               ...current,
@@ -1507,9 +1530,12 @@ export function App() {
     [workspace.clients, session],
   );
 
-  const login = (loginValue, passwordValue) => {
-    if (loginValue === PSYCHOLOGIST.login && passwordValue === PSYCHOLOGIST.password) {
-      setSession({ role: "psychologist" });
+  const login = async (loginValue, passwordValue) => {
+    const therapist = THERAPISTS.find((item) => item.login === loginValue);
+    if (therapist) {
+      const credentialHash = await hashCredentials(loginValue, passwordValue);
+      if (credentialHash !== therapist.credentialHash) return false;
+      setSession({ role: "psychologist", therapistId: therapist.id, name: therapist.name });
       return true;
     }
     const client = workspace.clients.find(
@@ -1541,10 +1567,14 @@ export function App() {
     );
   }
 
+  const sessionTherapist = THERAPISTS.find((item) => item.id === session.therapistId);
+  if (!sessionTherapist) return <LoginScreen workspace={workspace} onLogin={login} onReset={resetDemo} />;
+
   return (
     <PsychologistPortal
       workspace={workspace}
       setWorkspace={setWorkspace}
+      therapist={sessionTherapist}
       onLogout={() => setSession(null)}
     />
   );

@@ -2,27 +2,28 @@
 
 ## Direction
 
-Editorial product UI grounded in the existing PRIVATE RESULTS portal. Warm paper surfaces, deep navy typography, restrained cobalt and coral actions, and original tactile geometric photography. Product controls remain familiar and highly legible.
+Quiet clinical product UI aligned with the public visual language of Psychoterapia W RÓWNOWADZE without copying its logo. Warm paper surfaces, sage typography and actions, dusty-rose accents, generous spacing, and the product's original tactile geometric photography.
 
 ## Color
 
-- Canvas: `oklch(0.965 0.012 73)`
-- Paper: `oklch(0.985 0.008 76)`
-- Ink: `oklch(0.245 0.045 252)`
-- Muted text: `oklch(0.49 0.025 250)`
-- Rule: `oklch(0.84 0.014 78)`
-- Cobalt: `oklch(0.49 0.13 252)`
-- Cobalt soft: `oklch(0.93 0.035 252)`
-- Coral: `oklch(0.68 0.13 34)`
-- Coral soft: `oklch(0.94 0.035 35)`
-- Success: `oklch(0.58 0.09 155)`
-- Warning: `oklch(0.72 0.12 82)`
-- Error: `oklch(0.57 0.18 24)`
+- Canvas: `#f4f1ed`
+- Paper: `#fffdf9`
+- Ink: `#5c695f`
+- Muted text: `#777d78`
+- Rule: `#dfdcd5`
+- Sage action: `#657a70`
+- Sage dark: `#4f6258`
+- Sage soft: `#e6ede8`
+- Dusty rose: `#c69582`
+- Dusty rose soft: `#f3e5df`
+- Success: `#668d78`
+- Warning: `#b98767`
+- Error: `#a85f58`
 
 ## Typography
 
-- Display and report headings: Fraunces, weight 500.
-- Product UI, body, labels and controls: DM Sans, weights 400, 500, 600 and 700.
+- Display, navigation, controls and body: Comfortaa, weights 400–700.
+- DM Sans remains a legibility fallback for dense data and system fallback.
 - Body line length: 68 characters maximum for explanatory prose.
 - UI scale: 12, 14, 16, 18, 22, 28, 40 and 56 px.
 
@@ -36,8 +37,8 @@ Editorial product UI grounded in the existing PRIVATE RESULTS portal. Warm paper
 
 ## Components
 
-- Buttons: 44 px minimum height, 6 px radius, solid primary and quiet secondary.
-- Inputs: explicit labels, 48 px height, clear error and focus states.
+- Buttons: 44 px minimum height, pill shape, solid sage primary and quiet secondary.
+- Inputs: explicit labels, 48 px height, 14 px radius, clear error and focus states.
 - Answer options: full-width radio rows with a numbered scale and supporting label.
 - Progress: labeled count plus linear indicator, never color alone.
 - Status chips: compact, bordered, sentence case.
