@@ -315,15 +315,33 @@ export const TESTS = [
     mailStep: "10",
     short: "PHQ-9",
     title: "Kwestionariusz Zdrowia Pacjenta PHQ-9",
-    eyebrow: "Katalog narzędzi",
-    duration: "9 pozycji",
+    eyebrow: "Kwestionariusz nastroju",
+    duration: "około 3 minuty",
     image: "./assets/section-02.webp",
-    available: false,
-    sourceLabel: "Pfizer / PHQ Screeners",
-    sourceUrl: "https://www.pfizer.com/contact/faqs",
-    intro: "Krótkie narzędzie do przesiewowej oceny objawów depresyjnych i monitorowania zmiany.",
-    context: "Przed aktywacją należy podłączyć zatwierdzoną polską wersję i procedurę bezpieczeństwa dla odpowiedzi dotyczących samouszkodzeń.",
-    questions: [],
+    sourceLabel: "PHQ-9, polska wersja formularza",
+    sourceUrl: "https://www.multiculturalmentalhealth.ca/wp-content/uploads/2019/07/PHQ-9-Polish.pdf",
+    licenseLabel: "© Pfizer Inc.; kopiowanie za zgodą",
+    intro: "Oceń, jak często w ciągu ostatnich dwóch tygodni dokuczały Ci opisane problemy.",
+    context: "PHQ-9 pomaga przesiewowo ocenić nasilenie objawów depresyjnych. Wynik nie jest diagnozą i wymaga interpretacji przez specjalistę.",
+    safetyQuestion: 8,
+    safetyReportText: "W pytaniu dotyczącym śmierci lub samouszkodzenia zaznaczono odpowiedź inną niż „Wcale nie”.",
+    scale: [
+      { value: 0, label: "Wcale nie" },
+      { value: 1, label: "Kilka dni" },
+      { value: 2, label: "Więcej niż połowę dni" },
+      { value: 3, label: "Niemal codziennie" },
+    ],
+    questions: [
+      "Niewielkie zainteresowanie lub odczuwanie niewielkiej przyjemności z wykonywania czynności.",
+      "Uczucie przygnębienia, smutku lub beznadziejności.",
+      "Trudności z zasypianiem, przerywany sen albo zbyt długi sen.",
+      "Uczucie zmęczenia lub brak energii.",
+      "Słaby apetyt lub jedzenie w zbyt dużych ilościach.",
+      "Poczucie niezadowolenia z siebie, wrażenie porażki albo zawiedzenia siebie lub rodziny.",
+      "Problemy ze skupieniem uwagi, na przykład przy czytaniu gazety lub oglądaniu telewizji.",
+      "Poruszanie się lub mówienie tak wolno, że inni mogli to zauważyć, albo przeciwnie — niepokój i ruchliwość większe niż zwykle.",
+      "Myśli, że lepiej byłoby umrzeć, albo myśli o wyrządzeniu sobie krzywdy.",
+    ],
   },
   {
     id: "audit",
@@ -331,15 +349,117 @@ export const TESTS = [
     mailStep: "11",
     short: "AUDIT",
     title: "Alcohol Use Disorders Identification Test (AUDIT)",
-    eyebrow: "Katalog narzędzi WHO",
-    duration: "10 pozycji",
+    eyebrow: "Kwestionariusz przesiewowy WHO",
+    duration: "około 5 minut",
     image: "./assets/section-05.webp",
-    available: false,
-    sourceLabel: "World Health Organization",
-    sourceUrl: "https://www.who.int/publications/i/item/audit-the-alcohol-use-disorders-identification-test-guidelines-for-use-in-primary-health-care",
-    intro: "Narzędzie przesiewowe WHO dotyczące ryzykownego i szkodliwego używania alkoholu.",
-    context: "Przed aktywacją potrzebna jest zweryfikowana polska wersja oraz gabinetowa procedura dalszego postępowania.",
-    questions: [],
+    sourceLabel: "WHO; polska adaptacja i walidacja PARPA",
+    sourceUrl: "https://www.parpa.pl/images/Adaptacja_i_walidacja_testu_AUDIT_do_warunk%C3%B3w_polskich.pdf",
+    licenseLabel: "Polska wersja zwalidowana w 2018 r.",
+    scoreMax: 40,
+    intro: "Odpowiedz na dziesięć pytań dotyczących używania alkoholu — część z nich odnosi się do ostatniego roku.",
+    context: "AUDIT jest narzędziem przesiewowym WHO. Jedna standardowa porcja to 10 g czystego alkoholu: około 250 ml piwa 5%, 100 ml wina 12% albo 30 ml wódki 40%. Wynik nie stanowi samodzielnej diagnozy.",
+    questions: [
+      {
+        text: "Jak często pijesz napoje zawierające alkohol?",
+        options: [
+          { value: 0, label: "Nigdy" },
+          { value: 1, label: "Raz w miesiącu lub rzadziej" },
+          { value: 2, label: "2–4 razy w miesiącu" },
+          { value: 3, label: "2–3 razy w tygodniu" },
+          { value: 4, label: "4 razy w tygodniu lub częściej" },
+        ],
+      },
+      {
+        text: "Ile porcji standardowych zawierających alkohol wypijasz w trakcie typowego dnia picia?",
+        options: [
+          { value: 0, label: "1–2 porcje" },
+          { value: 1, label: "3–4 porcje" },
+          { value: 2, label: "5–6 porcji" },
+          { value: 3, label: "7–9 porcji" },
+          { value: 4, label: "10 lub więcej porcji" },
+        ],
+      },
+      {
+        text: "Jak często wypijasz 6 lub więcej porcji podczas jednej okazji?",
+        options: [
+          { value: 0, label: "Nigdy" },
+          { value: 1, label: "Rzadziej niż raz w miesiącu" },
+          { value: 2, label: "Raz w miesiącu" },
+          { value: 3, label: "Raz w tygodniu" },
+          { value: 4, label: "Codziennie lub prawie codziennie" },
+        ],
+      },
+      {
+        text: {
+          female: "Jak często w ciągu ostatniego roku stwierdzałaś, że nie możesz przestać pić po rozpoczęciu?",
+          male: "Jak często w ciągu ostatniego roku stwierdzałeś, że nie możesz przestać pić po rozpoczęciu?",
+          neutral: "Jak często w ciągu ostatniego roku nie udawało Ci się przestać pić po rozpoczęciu?",
+        },
+        options: [
+          { value: 0, label: "Nigdy" },
+          { value: 1, label: "Rzadziej niż raz w miesiącu" },
+          { value: 2, label: "Raz w miesiącu" },
+          { value: 3, label: "Raz w tygodniu" },
+          { value: 4, label: "Codziennie lub prawie codziennie" },
+        ],
+      },
+      {
+        text: "Jak często w ciągu ostatniego roku zdarzyło Ci się z powodu picia nie zrobić tego, czego normalnie od Ciebie oczekiwano?",
+        options: [
+          { value: 0, label: "Nigdy" },
+          { value: 1, label: "Rzadziej niż raz w miesiącu" },
+          { value: 2, label: "Raz w miesiącu" },
+          { value: 3, label: "Raz w tygodniu" },
+          { value: 4, label: "Codziennie lub prawie codziennie" },
+        ],
+      },
+      {
+        text: "Jak często w ciągu ostatniego roku trzeba było rano napić się alkoholu, aby dojść do siebie po intensywnym piciu poprzedniego dnia?",
+        options: [
+          { value: 0, label: "Nigdy" },
+          { value: 1, label: "Rzadziej niż raz w miesiącu" },
+          { value: 2, label: "Raz w miesiącu" },
+          { value: 3, label: "Raz w tygodniu" },
+          { value: 4, label: "Codziennie lub prawie codziennie" },
+        ],
+      },
+      {
+        text: "Jak często w ciągu ostatniego roku pojawiało się poczucie winy lub wyrzuty sumienia po wypiciu alkoholu?",
+        options: [
+          { value: 0, label: "Nigdy" },
+          { value: 1, label: "Rzadziej niż raz w miesiącu" },
+          { value: 2, label: "Raz w miesiącu" },
+          { value: 3, label: "Raz w tygodniu" },
+          { value: 4, label: "Codziennie lub prawie codziennie" },
+        ],
+      },
+      {
+        text: "Jak często w ciągu ostatniego roku z powodu picia nie udawało Ci się przypomnieć sobie wydarzeń z poprzedniego wieczoru?",
+        options: [
+          { value: 0, label: "Nigdy" },
+          { value: 1, label: "Rzadziej niż raz w miesiącu" },
+          { value: 2, label: "Raz w miesiącu" },
+          { value: 3, label: "Raz w tygodniu" },
+          { value: 4, label: "Codziennie lub prawie codziennie" },
+        ],
+      },
+      {
+        text: "Czy zdarzyło się, że Ty lub inna osoba doznała urazu w wyniku Twojego picia?",
+        options: [
+          { value: 0, label: "Nie" },
+          { value: 2, label: "Tak, ale nie w ostatnim roku" },
+          { value: 4, label: "Tak, w ciągu ostatniego roku" },
+        ],
+      },
+      {
+        text: "Czy zdarzyło się, że ktoś z rodziny, znajomy, lekarz lub inny pracownik ochrony zdrowia był zaniepokojony Twoim piciem albo sugerował jego ograniczenie?",
+        options: [
+          { value: 0, label: "Nie" },
+          { value: 2, label: "Tak, ale nie w ostatnim roku" },
+          { value: 4, label: "Tak, w ciągu ostatniego roku" },
+        ],
+      },
+    ],
   },
   {
     id: "asrs-v1-1",
@@ -364,15 +484,43 @@ export const TESTS = [
     mailStep: "13",
     short: "PCL-5",
     title: "PTSD Checklist for DSM-5 (PCL-5)",
-    eyebrow: "Katalog narzędzi PTSD",
-    duration: "20 pozycji",
+    eyebrow: "Kwestionariusz objawów pourazowych",
+    duration: "około 8 minut",
     image: "./assets/section-04.webp",
-    available: false,
-    sourceLabel: "U.S. Department of Veterans Affairs",
-    sourceUrl: "https://www.ptsd.va.gov/professional/assessment/adult-sr/ptsd-checklist.asp",
-    intro: "Public-domainowe narzędzie do oceny nasilenia objawów PTSD i monitorowania zmiany.",
-    context: "Interpretacja należy do wykwalifikowanego specjalisty. Aktywacja czeka na zweryfikowaną polską wersję i procedurę kliniczną.",
-    questions: [],
+    sourceLabel: "National Center for PTSD; wersja polska: Zawadzki, Popiel, Białecka i Pragłowska",
+    sourceUrl: "https://file.lacounty.gov/SDSInter/dmh/1056182_PCL-5_Polish_Popiel.pdf",
+    licenseLabel: "Public domain — wersja oryginalna",
+    intro: "Oceń, jak bardzo w ciągu ostatniego miesiąca dokuczały Ci poniższe problemy związane ze stresującym wydarzeniem.",
+    context: "PCL-5 służy do przesiewowej oceny nasilenia objawów PTSD i monitorowania zmiany. Wynik nie zastępuje wywiadu klinicznego.",
+    scale: [
+      { value: 0, label: "Wcale" },
+      { value: 1, label: "Nieznacznie" },
+      { value: 2, label: "Średnio" },
+      { value: 3, label: "Znacznie" },
+      { value: 4, label: "Bardzo" },
+    ],
+    questions: [
+      "Powtarzające się, przykre i niechciane wspomnienia stresującego wydarzenia.",
+      "Powtarzające się przykre sny dotyczące stresującego wydarzenia.",
+      "Nagłe odczucie lub zachowywanie się tak, jakby stresujące wydarzenie działo się ponownie.",
+      "Silne zdenerwowanie, gdy coś przypomina o stresującym wydarzeniu.",
+      "Silne reakcje fizyczne, gdy coś przypomina o stresującym wydarzeniu, na przykład mocne bicie serca, trudności z oddychaniem lub pocenie się.",
+      "Unikanie wspomnień, myśli lub uczuć związanych ze stresującym wydarzeniem.",
+      "Unikanie zewnętrznych okoliczności przypominających o stresującym wydarzeniu, na przykład ludzi, miejsc, rozmów, zajęć, przedmiotów lub sytuacji.",
+      "Kłopoty z przypomnieniem sobie ważnych szczegółów stresującego wydarzenia.",
+      "Silne negatywne przekonania dotyczące siebie, innych ludzi lub świata.",
+      "Obwinianie siebie lub kogoś innego za stresujące wydarzenie albo za to, co stało się po nim.",
+      "Silne negatywne uczucia, takie jak strach, przerażenie, gniew, poczucie winy lub wstydu.",
+      "Utrata zainteresowania aktywnościami, które wcześniej sprawiały przyjemność.",
+      "Poczucie dystansu lub braku kontaktu z innymi ludźmi.",
+      "Trudności w przeżywaniu pozytywnych uczuć, na przykład szczęścia lub miłości wobec bliskich.",
+      "Okazywanie irytacji, wybuchy złości lub zachowania agresywne.",
+      "Skłonność do podejmowania zbyt dużego ryzyka lub zachowań, które mogą przynieść szkodę.",
+      "Nadmierna czujność, wyczulenie lub baczne zwracanie uwagi na wszystko.",
+      "Nerwowość lub łatwe wzdryganie się.",
+      "Problemy z koncentracją uwagi.",
+      "Kłopoty z zasypianiem lub utrzymaniem snu.",
+    ],
   },
 ].sort((first, second) => first.order - second.order);
 
@@ -546,14 +694,14 @@ export function getClientProgress(client) {
 }
 
 export function getScore(test, answers = {}) {
-  if (!test.scale && test.id !== "bdi2") return null;
+  if (!test.scale && !test.scoreMax && test.id !== "bdi2") return null;
   if (test.answerType === "yesNoWithNote") return null;
   const values = Object.values(answers).map((answer) => Number(answer));
   if (!values.length) return null;
   const value = values.reduce((sum, current) => sum + current, 0);
-  const max = test.id === "bdi2"
+  const max = test.scoreMax || (test.id === "bdi2"
     ? 63
-    : test.questions.length * Math.max(...test.scale.map((item) => item.value));
+    : test.questions.length * Math.max(...test.scale.map((item) => item.value)));
   if (test.id === "gad7") {
     const interpretation =
       value < 5
@@ -587,6 +735,42 @@ export function getScore(test, answers = {}) {
       interpretation: value < 13
         ? "Obniżony dobrostan — wynik do pogłębienia podczas konsultacji"
         : "Dobrostan powyżej progu przesiewowego WHO-5",
+    };
+  }
+  if (test.id === "phq9") {
+    const interpretation = value < 5
+      ? "Minimalne nasilenie objawów depresyjnych"
+      : value < 10
+        ? "Łagodne nasilenie objawów depresyjnych"
+        : value < 15
+          ? "Umiarkowane nasilenie objawów depresyjnych"
+          : value < 20
+            ? "Umiarkowanie ciężkie nasilenie objawów depresyjnych"
+            : "Ciężkie nasilenie objawów depresyjnych";
+    return {
+      value,
+      max,
+      interpretation,
+      alert: Number(answers[test.safetyQuestion]) > 0,
+    };
+  }
+  if (test.id === "audit") {
+    const interpretation = value < 8
+      ? "Picie o niskim poziomie ryzyka według progu przesiewowego"
+      : value < 16
+        ? "Ryzykowne spożywanie alkoholu"
+        : value < 20
+          ? "Szkodliwe picie alkoholu"
+          : "Wynik wskazujący na potrzebę oceny w kierunku uzależnienia";
+    return { value, max, interpretation };
+  }
+  if (test.id === "pcl5") {
+    return {
+      value,
+      max,
+      interpretation: value >= 31
+        ? "Wynik powyżej często stosowanego progu przesiewowego — wymaga oceny klinicznej"
+        : "Wynik poniżej często stosowanego progu przesiewowego — do interpretacji klinicznej",
     };
   }
   return {

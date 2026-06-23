@@ -371,7 +371,7 @@ function formatAnswer(test, question, raw, gender) {
 
 function ClientHome({ client, onOpenTest }) {
   const overall = getClientProgress(client);
-  const assignedTests = getAssignedTests(client);
+  const assignedTests = getAssignedTests(client).filter((test) => test.available !== false);
   return (
     <main className="client-main page-width">
       <section className="client-hero">
@@ -400,9 +400,7 @@ function ClientHome({ client, onOpenTest }) {
         </div>
         {assignedTests.map((test) => {
           const progress = getTestProgress(client, test);
-          const status = progress.unavailable
-            ? "setup"
-            : progress.completed
+          const status = progress.completed
             ? "completed"
             : progress.answerCount
               ? "progress"
@@ -411,8 +409,7 @@ function ClientHome({ client, onOpenTest }) {
             <button
               className="assignment-row"
               key={test.id}
-              disabled={test.available === false}
-              onClick={() => test.available !== false && onOpenTest(test.id)}
+              onClick={() => onOpenTest(test.id)}
             >
               <span className="assignment-number">{test.mailStep}</span>
               <span className="assignment-copy">
@@ -424,9 +421,7 @@ function ClientHome({ client, onOpenTest }) {
                 <span className="assignment-meta">
                   <Clock3 size={15} /> {test.duration}
                   <span>
-                    {progress.unavailable
-                      ? "Formularz wymaga prywatnej konfiguracji gabinetu"
-                      : `${progress.answerCount} z ${progress.total} odpowiedzi`}
+                    {progress.answerCount} z {progress.total} odpowiedzi
                   </span>
                 </span>
               </span>
@@ -711,7 +706,7 @@ function TestFlow({ client, test, onAnswer, onComplete, onClose }) {
               <small>Odpowiedź zapisuje się automatycznie.</small>
             </label>
           )}
-          {test.id === "bdi2" && index === test.safetyQuestion && Number(answer) > 0 && (
+          {Number.isInteger(test.safetyQuestion) && index === test.safetyQuestion && Number(answer) > 0 && (
             <aside className="safety-alert" role="alert">
               <ShieldCheck size={22} />
               <div>
@@ -932,7 +927,7 @@ function TestReport({ client, test }) {
           <ShieldCheck size={22} />
           <div>
             <strong>Odpowiedź wymagająca pilnego omówienia</strong>
-            <p>W pytaniu dotyczącym myśli samobójczych zaznaczono odpowiedź inną niż „Nie myślę o odebraniu sobie życia”.</p>
+            <p>{test.safetyReportText || "W pytaniu dotyczącym myśli samobójczych zaznaczono odpowiedź wskazującą na ryzyko."}</p>
           </div>
         </aside>
       )}
@@ -1050,7 +1045,9 @@ function CreateClient({ clients, onCreate, onCancel }) {
   const [created, setCreated] = useState(null);
   const [copied, setCopied] = useState("");
   const assignableTests = TESTS.filter((test) => !test.supplemental);
-  const [selectedTests, setSelectedTests] = useState(assignableTests.map((test) => test.id));
+  const [selectedTests, setSelectedTests] = useState(
+    assignableTests.filter((test) => test.available !== false).map((test) => test.id),
+  );
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -1208,7 +1205,7 @@ function CreateClient({ clients, onCreate, onCancel }) {
             <div className="assignment-controls">
               <span>{selectedTests.length} z {assignableTests.length} formularzy</span>
               <div>
-                <button type="button" onClick={() => setSelectedTests(assignableTests.map((test) => test.id))}>Zaznacz wszystkie</button>
+                <button type="button" onClick={() => setSelectedTests(assignableTests.filter((test) => test.available !== false).map((test) => test.id))}>Zaznacz gotowe</button>
                 <button type="button" onClick={() => setSelectedTests([])}>Wyczyść</button>
               </div>
             </div>
@@ -1216,6 +1213,7 @@ function CreateClient({ clients, onCreate, onCancel }) {
               <label className="checked-test" key={test.id}>
                 <input
                   type="checkbox"
+                  disabled={test.available === false}
                   checked={selectedTests.includes(test.id)}
                   onChange={() => setSelectedTests((current) => current.includes(test.id)
                     ? current.filter((id) => id !== test.id)
@@ -1225,7 +1223,7 @@ function CreateClient({ clients, onCreate, onCancel }) {
                   <strong>{test.mailStep} · {test.title}</strong>
                   <small>
                     {test.duration}
-                    {test.available === false ? " · do konfiguracji" : " · gotowy"}
+                    {test.available === false ? " · wymaga licencji lub zatwierdzonej treści" : " · gotowy"}
                     {test.sourceLabel ? ` · ${test.sourceLabel}` : ""}
                   </small>
                 </span>
@@ -1256,7 +1254,10 @@ function ClientManagement({ client, clients, onSave, onDelete, onClose }) {
   const [deadline, setDeadline] = useState(client.deadline || "");
   const [notes, setNotes] = useState(client.notes || "");
   const [password, setPassword] = useState(client.password);
-  const [selectedTests, setSelectedTests] = useState(client.assignedTests || []);
+  const [selectedTests, setSelectedTests] = useState(
+    (client.assignedTests || []).filter((id) =>
+      assignableTests.some((test) => test.id === id && test.available !== false)),
+  );
   const [formError, setFormError] = useState("");
   const [feedback, setFeedback] = useState("");
   const [copied, setCopied] = useState("");
@@ -1392,7 +1393,7 @@ function ClientManagement({ client, clients, onSave, onDelete, onClose }) {
             <div className="assignment-controls">
               <span>{selectedTests.length} z {assignableTests.length} formularzy</span>
               <div>
-                <button type="button" onClick={() => setSelectedTests(assignableTests.map((test) => test.id))}>Zaznacz wszystkie</button>
+                <button type="button" onClick={() => setSelectedTests(assignableTests.filter((test) => test.available !== false).map((test) => test.id))}>Zaznacz gotowe</button>
                 <button type="button" onClick={() => setSelectedTests([])}>Wyczyść</button>
               </div>
             </div>
@@ -1400,6 +1401,7 @@ function ClientManagement({ client, clients, onSave, onDelete, onClose }) {
               <label className="checked-test" key={test.id}>
                 <input
                   type="checkbox"
+                  disabled={test.available === false}
                   checked={selectedTests.includes(test.id)}
                   onChange={() => setSelectedTests((current) => current.includes(test.id)
                     ? current.filter((id) => id !== test.id)
@@ -1409,7 +1411,7 @@ function ClientManagement({ client, clients, onSave, onDelete, onClose }) {
                   <strong>{test.mailStep} · {test.title}</strong>
                   <small>
                     {test.duration}
-                    {test.available === false ? " · do konfiguracji" : " · gotowy"}
+                    {test.available === false ? " · wymaga licencji lub zatwierdzonej treści" : " · gotowy"}
                     {test.sourceLabel ? ` · ${test.sourceLabel}` : ""}
                   </small>
                 </span>
