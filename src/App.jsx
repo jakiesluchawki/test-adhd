@@ -98,7 +98,14 @@ function loadWorkspace() {
         ownerId: client.ownerId || freshDemo?.ownerId || PSYCHOLOGIST.id,
         assignedTests: client.assignedTests || freshDemo?.assignedTests
           || TESTS.filter((test) => !test.supplemental).map((test) => test.id),
-        answers: { ...blankAnswers, ...freshDemo?.answers, ...client.answers },
+        answers: Object.fromEntries(TESTS.map((test) => [
+          test.id,
+          {
+            ...(blankAnswers[test.id] || {}),
+            ...(freshDemo?.answers?.[test.id] || {}),
+            ...(client.answers?.[test.id] || {}),
+          },
+        ])),
         completedTests: Array.from(new Set([
           ...(freshDemo?.completedTests || []),
           ...(client.completedTests || []),

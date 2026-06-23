@@ -519,7 +519,8 @@ export function getTestProgress(client, test) {
     percent: test.questions.length
       ? Math.round((answerCount / test.questions.length) * 100)
       : 0,
-    completed: client.completedTests.includes(test.id),
+    completed: client.completedTests.includes(test.id)
+      && answerCount === test.questions.length,
   };
 }
 
@@ -540,7 +541,7 @@ export function getClientProgress(client) {
     answered,
     total,
     percent: total ? Math.round((answered / total) * 100) : 0,
-    completed: Boolean(total) && assignedTests.every((test) => client.completedTests.includes(test.id)),
+    completed: Boolean(total) && assignedTests.every((test) => getTestProgress(client, test).completed),
   };
 }
 
