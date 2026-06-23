@@ -22,8 +22,9 @@ Quiet clinical product UI aligned with the public visual language of Psychoterap
 
 ## Typography
 
-- Display, navigation, controls and body: Comfortaa, weights 400–700.
-- DM Sans remains a legibility fallback for dense data and system fallback.
+- Brand name and section/page headings: Comfortaa, weights 500–700.
+- Product UI, forms, navigation, tables, statuses and body copy: DM Sans, weights 400–700.
+- Never use Comfortaa for dense labels, form values, table-like rows or status chips.
 - Body line length: 68 characters maximum for explanatory prose.
 - UI scale: 12, 14, 16, 18, 22, 28, 40 and 56 px.
 

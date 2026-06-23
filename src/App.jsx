@@ -1236,7 +1236,12 @@ function CreateClient({ clients, onCreate, onCancel }) {
           <button className="button button-primary" type="submit" disabled={selectedTests.length === 0}><Plus size={18} /> Utwórz konto demo</button>
         </form>
       </section>
-      <img src="./assets/section-05.webp" alt="Abstrakcyjna kompozycja symbolizująca rozpoczęcie procesu" />
+      <img
+        src="./assets/create-client-portrait.webp"
+        width="1024"
+        height="1536"
+        alt="Abstrakcyjna postać porządkująca informacje przed konsultacją"
+      />
     </main>
   );
 }
