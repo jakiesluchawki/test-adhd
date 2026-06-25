@@ -251,7 +251,7 @@ function LoginScreen({ workspace, onLogin, onReset }) {
                 <UserRound size={16} />
                 Uzupełnij dane klienta
               </button>
-              <span className="demo-account-note"><UsersRound size={16} /> 3 osobne konta terapeutów</span>
+              <span className="demo-account-note"><UsersRound size={16} /> {THERAPISTS.length} osobne konta terapeutów</span>
             </div>
           </div>
         </div>

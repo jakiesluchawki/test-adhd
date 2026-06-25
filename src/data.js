@@ -619,6 +619,25 @@ export function createInitialWorkspace() {
         answers: Object.fromEntries(TESTS.map((test) => [test.id, {}])),
         completedTests: [],
       },
+      {
+        id: "generatywni-korzekwa",
+        ownerId: "therapist-generatywni",
+        name: "Korzekwa",
+        gender: "neutral",
+        login: "korzekwa",
+        password: "K0r!036494841c4d62f9810c47aa",
+        email: "korzekwa@example.test",
+        phone: "",
+        contactPreference: "email",
+        notes: "Konto demonstracyjne przypisane do Generatywnych.",
+        assignedAt: "25.06.2026",
+        deadline: "do ustalenia",
+        assignedTests: TESTS.filter((test) => !test.supplemental && test.available !== false)
+          .map((test) => test.id),
+        introAccepted: false,
+        answers: Object.fromEntries(TESTS.map((test) => [test.id, {}])),
+        completedTests: [],
+      },
     ],
   };
 }
@@ -644,6 +663,13 @@ export const THERAPISTS = [
     login: "aleksandra.jasinska",
     credentialHash: "9a5a21506b1b5276b21c4b0dfbfb3ea508869dcc51ad2c23cb631cdf6f4c9b73",
     practice: "Pracownia Psychoterapii W RÓWNOWADZE",
+  },
+  {
+    id: "therapist-generatywni",
+    name: "Generatywni",
+    login: "generatywni",
+    credentialHash: "31ea535bdc5711268d90764e562f0cf4a77cad0215ec6211df2f15918fe561e2",
+    practice: "Generatywni",
   },
 ];
 
